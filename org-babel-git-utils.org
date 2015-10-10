@@ -4,7 +4,7 @@
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
 #+TITLE: Org Babel Git Utilities
-#+DATE: <2015-10-10 15:07:32 Saturday>
+#+DATE: <2015-10-10 16:13:41 Saturday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
@@ -62,22 +62,46 @@ inside emacs .org files by simply typing ^C^C, getting results like this:
 : + echo hello world
 : hello world
 
+
 * Configuration
+** Actual configuration						   :noexport:
+   This section was intended to be invisible in the README.org, but it
+   looks like github's interpretation of =.org= files does not support
+   the =:noexport:= tag, here's what I actually used to create the
+   output below:
+
+   - Note, in org-babel, it looks like the first lexical definition of
+     a =#NAME:= always wins, even if it is inside an
+     =#begin_example... #end_example#= block.
+
+    #+NAME: BASEDIR
+    | /home/george/projects/current   |
+
+    #+NAME: BASEDIR
+    | /home/george/git/github.com/eludom/   |
+
+    #+NAME: RECENT
+    | 1   |
+
+    #+NAME: MAXLINES
+    | 100 |
+
+    #+NAME: IGNOREDIRS
+    | git-ignore-dirs.txt |
+
 ** Description of configuration
-    #+begin_example
-#+NAME: BASEDIR
-| /home/george/projects/current |
+   #+begin_src :eval no
+    #+NAME: BASEDIR
+    | /home/george/projects/current   |
 
-#+NAME: RECENT
-| 1   |
+    #+NAME: RECENT
+    | 1   |
 
-#+NAME: MAXLINES
-| 100 |
+    #+NAME: MAXLINES
+    | 100 |
 
-#+NAME: IGNOREDIRS
-| git-ignore-dirs.txt |
-
-    #+end_example
+    #+NAME: IGNOREDIRS   
+   #+end_src
 
    - BASEDIR :: defines the root of all potentially git controlled files.
    - RECENT :: defines the number of days that define "recent"
@@ -97,42 +121,20 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 (setq org-confirm-babel-evaluate nil)
 #+end_src
 
-** Actual configuration						   :noexport:
-   This section was intended to be invisible in the README.org, but it
-   looks like github's interpretation of =.org= files does not support
-   the =:noexport:= tag, here's what I actually used to create the
-   output below:
-
-
-
-#+NAME: BASEDIR
-| /home/george/git/github.com/eludom/   |
-
-# | /home/george/projects/current |
-
-#+NAME: RECENT
-| 1   |
-
-#+NAME: MAXLINES
-| 100 |
-
-#+NAME: IGNOREDIRS
-| git-ignore-dirs.txt |
 
 * Actions
 ** DONE List git repos starting from a BASEDIR
  #+name: GIT-DIRS
  #+begin_src sh  :results table :exports both :var basedir=BASEDIR
- #exec 2>&1;date;set -e; set -u; set -x
- #exec 2>&1;set +e; set -u; set -e
- cd $basedir
- find `pwd` -name .git -print || true
+ exec 2>&1;set -e; set -u; set +x
+ cd $basedir ||  echo "cd $basedir failed" 
+ find `pwd` -name .git -print 
+
  #+end_src
 
  #+RESULTS: GIT-DIRS
  | /home/george/projects/current/daniel/.git        |
  | /home/george/projects/current/home/.git          |
- | /home/george/projects/current/courses/.git       |
  | /home/george/projects/current/org-git-utils/.git |
 
 ** DONE List current remotes for each git repo
@@ -142,22 +144,26 @@ You might have to put something like this in your =~/.emacs.d/init.el:
    it.
 
  #+name: git-files-and-repos
- #+begin_src sh  :results table :exports both  :var gitdirs=GIT-DIRS 
- echo gitdir remote1 url1 type1 remote2 url2 type2
+ #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
+ echo gitdir remote1 url1 type1 remote2 url2 type2 | sed 's/^/|/;s/ /|/g'
+ echo "|-"
  for gitdir in $gitdirs; do
    dirname=`dirname $gitdir` || true
    cd $dirname || true
    REMOTES=`git remote -v`  || true
-   echo $gitdir $REMOTES || true
+   echo $gitdir $REMOTES | sed 's/^/|/;s/ /|/g' || true
  done
  #+end_src
 
  #+RESULTS: git-files-and-repos
+ :RESULTS:
  | gitdir                                           | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
+ |--------------------------------------------------+---------+-----------------------------------------------+---------+---------+-----------------------------------------------+--------|
  | /home/george/projects/current/daniel/.git        | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (push) |
  | /home/george/projects/current/home/.git          | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (push) |
- | /home/george/projects/current/courses/.git       |         |                                               |         |         |                                               |        |
  | /home/george/projects/current/org-git-utils/.git | origin  | git@github.com:eludom/org-git-utils.git       | (fetch) | origin  | git@github.com:eludom/org-git-utils.git       | (push) |
+ :END:
+
 
 ** DONE Make sure things are checked in/out of git automatically
 
@@ -188,11 +194,9 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
  #+RESULTS: git-autocommit-setup
  : dirname
- : /home/george/projects/current/git/.dir-locals.el does not exist. Creating.
  : /home/george/projects/current/daniel/.dir-locals.el already exists
  : /home/george/projects/current/home/.dir-locals.el already exists
- : /home/george/projects/current/courses/.dir-locals.el already exists
- : /home/george/projects/current/org-git-utils/.dir-locals.el does not exist. Creating.
+ : /home/george/projects/current/org-git-utils/.dir-locals.el already exists
 
 ** DONE Find recently modified files not in git
 
@@ -246,10 +250,14 @@ You might have to put something like this in your =~/.emacs.d/init.el:
   | /home/george/projects/current/ignore-these-dirs.txt         |
   | /home/george/projects/current/emacs                         |
   | /home/george/projects/current/emacs/emacs-project.html      |
-  | /home/george/projects/current/emacs/.#emacs-project.org     |
   | /home/george/projects/current/emacs/emacs-project.org       |
   | /home/george/projects/current/personal                      |
   | /home/george/projects/current/personal/personal-project.org |
+  | /home/george/projects/current/git-controlled-dirs.txt       |
+  | /home/george/projects/current/git-ignore-dirs.txt           |
+  | /home/george/projects/current/courses                       |
+  | /home/george/projects/current/courses/coursera/exdata-08    |
+  | /home/george/projects/current/courses/.dir-locals.el        |
 
 
 ** TODO Do git pulls for all repos
@@ -266,5 +274,6 @@ You might have to put something like this in your =~/.emacs.d/init.el:
     improve the actual org-git-utils.org.   From time to time, I may
     update the README, but you should pull the org-git-utils file from
     the repo to actually use. 
+
 
 
