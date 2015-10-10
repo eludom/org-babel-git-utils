@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2015-10-10 Sat 14:11 -->
+<!-- 2015-10-10 Sat 14:19 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>Org Babel Git Utilities</title>
@@ -151,7 +151,7 @@ for the JavaScript code in this tag.
 <li><a href="#orgheadline2">1. Introduction</a></li>
 <li><a href="#orgheadline4">2. Configuration</a>
 <ul>
-<li><a href="#orgheadline3">2.1. <span class="todo nilTODO">TODO</span> <code>[4/4]</code> Automate my git repo setup</a></li>
+<li><a href="#orgheadline3">2.1. Description of configuration</a></li>
 </ul>
 </li>
 <li><a href="#orgheadline1">3. Actions</a>
@@ -235,12 +235,8 @@ hello world
 <h2 id="orgheadline4"><span class="section-number-2">2</span> Configuration</h2>
 <div class="outline-text-2" id="text-2">
 </div><div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3"><span class="section-number-3">2.1</span> <span class="todo TODO">TODO</span> <code>[4/4]</code> Automate my git repo setup</h3>
+<h3 id="orgheadline3"><span class="section-number-3">2.1</span> Description of configuration</h3>
 <div class="outline-text-3" id="text-2-1">
-<p>
-Set the following babel variables as appropriate:
-</p>
-
 <pre class="example">
 #+NAME: BASEDIR
 | /home/george/projects/current |
@@ -263,9 +259,25 @@ modification.</dd>
 <dt>IGNOREDIRS</dt><dd>(if it exists) lists a file in BASEDIR that
 contains   directory names to ignore.</dd>
 </dl>
+
+
+
+<p>
+You might have to put something like this in your =~/.emacs.d/init.el:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-lisp">(org-babel-do-load-languages
+    'org-babel-load-languages '((python . t) (sh . t) (lisp . t) (R . t) (ditaa . t)))
+(setq org-export-babel-evaluate nil)
+(setq org-confirm-babel-evaluate nil)
+</pre>
 </div>
 </div>
 </div>
+</div>
+
 
 <div id="outline-container-orgheadline1" class="outline-2">
 <h2 id="orgheadline1"><span class="section-number-2">3</span> Actions</h2>
@@ -587,9 +599,9 @@ the repo to actually use.</li>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-10-10 Sat 14:11&gt;</span></span></p>
+<p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-10-10 Sat 14:19&gt;</span></span></p>
 <p class="author">Author: George M Jones</p>
-<p class="date">Created: 2015-10-10 Sat 14:11</p>
+<p class="date">Created: 2015-10-10 Sat 14:19</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
