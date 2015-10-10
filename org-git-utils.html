@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2015-10-10 Sat 14:01 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>If it's not in git, it does not exist.</title>
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="George M Jones" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">If it's not in git, it does not exist.</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgheadline2">1. Introduction</a></li>
+<li><a href="#orgheadline4">2. Configuration</a>
+<ul>
+<li><a href="#orgheadline3">2.1. <span class="todo nilTODO">TODO</span> <code>[4/4]</code> Automate my git repo setup</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline1">3. Actions</a>
+<ul>
+<li><a href="#orgheadline5">3.1. <span class="done nilDONE">DONE</span> List git repos starting from a BASEDIR</a></li>
+<li><a href="#orgheadline6">3.2. <span class="done nilDONE">DONE</span> List current remotes for each git repo</a></li>
+<li><a href="#orgheadline7">3.3. <span class="done nilDONE">DONE</span> Make sure things are checked in/out of git automatically</a></li>
+<li><a href="#orgheadline8">3.4. <span class="done nilDONE">DONE</span> Find recently modified files not in git</a></li>
+<li><a href="#orgheadline9">3.5. <span class="todo nilTODO">TODO</span> Do git pulls for all repos</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline10">4. Caveats</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<blockquote>
+<p>
+If it's not in git, it does not exist.
+</p>
+
+<p>
+&#x2013;Me
+</p>
+</blockquote>
+
+<p>
+This is a set of Emacs org babel utilities to facilitate making that
+goal a reality.
+</p>
+
+<p>
+The model envisioned here is that there will be a base directory
+(BASEDIR), possibly your <code>$(HOME)</code> directory or something like
+<code>~/projects</code> with other directories below it, most/all of which should
+be under git control.
+</p>
+
+<p>
+The <a href="#orgheadline1">Actions</a> listed below will currently do the following:
+</p>
+
+<ul class="org-ul">
+<li>find all repos unde BASEDIR</li>
+<li>list the remotes (or lack of them) for each repo</li>
+<li>Add .dir-locals.el to each repo for use with <a href="https://github.com/ryuslash/git-auto-commit-mode">https://github.com/ryuslash/git-auto-commit-mode</a></li>
+<li>Find recently modified files (last RECENT days) that are not in a
+git repo or not in a directory listed to be ignored (IGNOREDIRS)</li>
+</ul>
+
+<p>
+For those not familiar with Babel, see
+<a href="http://orgmode.org/worg/org-contrib/babel/intro.html">http://orgmode.org/worg/org-contrib/babel/intro.html</a>.  Short version,
+it allows you to run code blocks (bash, python, lisp&#x2026;.) like this
+</p>
+
+<pre class="example">
+#+begin_src sh  :results output :exports both
+exec 2&gt;&amp;1;date;set -e; set -u; set -x
+
+echo hello world
+#+end_src
+</pre>
+
+<p>
+inside emacs .org files by simply typing ^C^C, getting results like this:
+</p>
+
+<pre class="example">
+Sat Oct 10 13:47:28 EDT 2015
++ echo hello world
+hello world
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4"><span class="section-number-2">2</span> Configuration</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3"><span class="section-number-3">2.1</span> <span class="todo TODO">TODO</span> <code>[4/4]</code> Automate my git repo setup</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Set the following babel variables as appropriate:
+</p>
+
+<pre class="example">
+#+NAME: BASEDIR
+| /home/george/projects/current |
+
+#+NAME: RECENT
+| 1   |
+
+#+NAME: MAXLINES
+| 100 |
+
+#+NAME: IGNOREDIRS
+| git-ignore-dirs.txt |
+</pre>
+
+<dl class="org-dl">
+<dt>BASEDIR</dt><dd>defines the root of all potentially git controlled files.</dd>
+<dt>RECENT</dt><dd>defines the number of days that define "recent"
+modification.</dd>
+<dt>MAXLINES</dt><dd>defined the maximum number of lines to display</dd>
+<dt>IGNOREDIRS</dt><dd>(if it exists) lists a file in BASEDIR that
+contains   directory names to ignore.</dd>
+</dl>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1"><span class="section-number-2">3</span> Actions</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5"><span class="section-number-3">3.1</span> <span class="done DONE">DONE</span> List git repos starting from a BASEDIR</h3>
+<div class="outline-text-3" id="text-3-1">
+<div class="org-src-container">
+
+<pre class="src src-sh" id="orgsrcblock1"><span style="color: #b22222;">#</span><span style="color: #b22222;">exec 2&gt;&amp;1;date;set -e; set -u; set -x</span>
+<span style="color: #b22222;">#</span><span style="color: #b22222;">exec 2&gt;&amp;1;set +e; set -u; set -e</span>
+<span style="color: #483d8b;">cd</span> $<span style="color: #a0522d;">basedir</span>
+find <span style="color: #ff00ff;">`pwd`</span> -name .git -print | egrep -vi ansible || true
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left"><i>home/george/projects/current/git</i>.git</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>home/george/projects/current/daniel</i>.git</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>home/george/projects/current/home</i>.git</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>home/george/projects/current/courses</i>.git</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>home/george/projects/current/org-git-utils</i>.git</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6"><span class="section-number-3">3.2</span> <span class="done DONE">DONE</span> List current remotes for each git repo</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+If a directory is listed with no remote, the decision needs to be
+made to ignore this, or create a (possibly) remote repo and add
+it.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh" id="orgsrcblock2"><span style="color: #483d8b;">echo</span> gitdir remote1 url1 type1 remote2 url2 type2
+<span style="color: #a020f0;">for</span> gitdir<span style="color: #a020f0;"> in</span> $<span style="color: #a0522d;">gitdirs</span>; <span style="color: #a020f0;">do</span>
+  <span style="color: #a0522d;">dirname</span>=<span style="color: #ff00ff;">`dirname $gitdir`</span> || true
+  <span style="color: #483d8b;">cd</span> $<span style="color: #a0522d;">dirname</span> || true
+  <span style="color: #a0522d;">REMOTES</span>=<span style="color: #ff00ff;">`git remote -v`</span>  || true
+  <span style="color: #483d8b;">echo</span> $<span style="color: #a0522d;">gitdir</span> $<span style="color: #a0522d;">REMOTES</span> || true
+<span style="color: #a020f0;">done</span>
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">gitdir</td>
+<td class="org-left">remote1</td>
+<td class="org-left">url1</td>
+<td class="org-left">type1</td>
+<td class="org-left">remote2</td>
+<td class="org-left">url2</td>
+<td class="org-left">type2</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>home/george/projects/current/git</i>.git</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>home/george/projects/current/daniel</i>.git</td>
+<td class="org-left">origin</td>
+<td class="org-left">ssh://gmj@port111.com/home/gmj/git/daniel.git</td>
+<td class="org-left">(fetch)</td>
+<td class="org-left">origin</td>
+<td class="org-left">ssh://gmj@port111.com/home/gmj/git/daniel.git</td>
+<td class="org-left">(push)</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>home/george/projects/current/home</i>.git</td>
+<td class="org-left">origin</td>
+<td class="org-left">ssh://gmj@port111.com/home/gmj/git/home</td>
+<td class="org-left">(fetch)</td>
+<td class="org-left">origin</td>
+<td class="org-left">ssh://gmj@port111.com/home/gmj/git/home</td>
+<td class="org-left">(push)</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>home/george/projects/current/courses</i>.git</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>home/george/projects/current/org-git-utils</i>.git</td>
+<td class="org-left">origin</td>
+<td class="org-left">git@github.com:eludom/org-git-utils.git</td>
+<td class="org-left">(fetch)</td>
+<td class="org-left">origin</td>
+<td class="org-left">git@github.com:eludom/org-git-utils.git</td>
+<td class="org-left">(push)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">3.3</span> <span class="done DONE">DONE</span> Make sure things are checked in/out of git automatically</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+I'm using git-auto-commit-mode
+<a href="https://github.com/ryuslash/git-auto-commit-mode">https://github.com/ryuslash/git-auto-commit-mode</a> in emacs, which
+automatically does a commit for every file save, optionally
+prompting for commit message and pushing to the  upstream.  This
+may be a little extreme, but maybe not&#x2026;.
+</p>
+
+<p>
+This script makes sure each git controlled directory has the
+requisite <code>.dir-locals.el</code> file.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh" id="orgsrcblock3"><span style="color: #483d8b;">echo</span> dirname 
+<span style="color: #a020f0;">for</span> gitdir<span style="color: #a020f0;"> in</span> $<span style="color: #a0522d;">gitdirs</span>; <span style="color: #a020f0;">do</span>
+  <span style="color: #a0522d;">dirname</span>=<span style="color: #ff00ff;">`dirname $gitdir`</span> || true
+  <span style="color: #a0522d;">file</span>=<span style="color: #8b2252;">"${dirname}/.dir-locals.el"</span>
+
+  <span style="color: #a020f0;">if</span> [ -f ${<span style="color: #a0522d;">file</span>} ]; <span style="color: #a020f0;">then</span>
+    <span style="color: #483d8b;">echo</span> ${<span style="color: #a0522d;">file</span>} already exists
+  <span style="color: #a020f0;">else</span>
+    <span style="color: #483d8b;">echo</span> ${<span style="color: #a0522d;">file</span>} does not exist. Creating.
+    <span style="color: #483d8b;">echo</span> <span style="color: #8b2252;">'((nil . ((eval git-auto-commit-mode 1))))'</span> &gt; ${<span style="color: #a0522d;">file</span>}
+  <span style="color: #a020f0;">fi</span>
+<span style="color: #a020f0;">done</span>
+</pre>
+</div>
+
+<pre class="example">
+dirname
+/home/george/projects/current/git/.dir-locals.el does not exist. Creating.
+/home/george/projects/current/daniel/.dir-locals.el already exists
+/home/george/projects/current/home/.dir-locals.el already exists
+/home/george/projects/current/courses/.dir-locals.el already exists
+/home/george/projects/current/org-git-utils/.dir-locals.el does not exist. Creating.
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8"><span class="section-number-3">3.4</span> <span class="done DONE">DONE</span> Find recently modified files not in git</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+Find recently modified files under the base directory that are not
+in git controlled directories.
+</p>
+
+<p>
+From here, the decision must be made to add directories to git
+control, or put them in the IGNOREDIRS
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh" id="orgsrcblock4">  <span style="color: #b22222;"># </span><span style="color: #b22222;">Crate a list of git controlled directorories</span>
+  <span style="color: #483d8b;">cd</span> $<span style="color: #a0522d;">basedir</span>
+  cp /dev/null git-controlled-dirs.txt
+
+  <span style="color: #a020f0;">for</span> gitdir<span style="color: #a020f0;"> in</span> $<span style="color: #a0522d;">gitdirs</span>; <span style="color: #a020f0;">do</span>
+    <span style="color: #a0522d;">dirname</span>=<span style="color: #ff00ff;">`dirname $gitdir`</span> || true
+    <span style="color: #483d8b;">echo</span> $<span style="color: #a0522d;">dirname</span> &gt;&gt; git-controlled-dirs.txt
+  <span style="color: #a020f0;">done</span>
+
+  <span style="color: #b22222;">#</span><span style="color: #b22222;">echo GIT-CONTROLLED-DIRS</span>
+  <span style="color: #b22222;">#</span><span style="color: #b22222;">cat git-controlled-dirs.txt</span>
+
+  cat git-controlled-dirs.txt &gt; ignore-these-dirs.txt
+
+  <span style="color: #a020f0;">if</span> [ -f $<span style="color: #a0522d;">ignoredirs</span> ]; <span style="color: #a020f0;">then</span>
+    cat $<span style="color: #a0522d;">ignoredirs</span> &gt;&gt; ignore-these-dirs.txt 
+  <span style="color: #a020f0;">fi</span>
+
+  <span style="color: #b22222;">#</span><span style="color: #b22222;">echo IGNORE ignore-these-dirs.txt</span>
+  <span style="color: #b22222;">#</span><span style="color: #b22222;">cat ignore-these-dirs.txt</span>
+
+  <span style="color: #b22222;"># </span><span style="color: #b22222;">Find files modified "recently"</span>
+
+  find <span style="color: #ff00ff;">`pwd`</span> -mtime -$<span style="color: #a0522d;">recent</span> -print &gt; recently-modified-files.txt || true
+<span style="color: #b22222;">#  </span><span style="color: #b22222;">echo FILES-RECENTLY-MODIFIED</span>
+<span style="color: #b22222;">#  </span><span style="color: #b22222;">cat recently-modified-files.txt || true</span>
+
+  <span style="color: #b22222;"># </span><span style="color: #b22222;">List recently modified files not in git controlled directories</span>
+
+  <span style="color: #483d8b;">echo</span> FILES-RECENTLY-MODIFIED-NOT-IN-GIT-DIRS
+  egrep -v -f ignore-these-dirs.txt recently-modified-files.txt | head -$<span style="color: #a0522d;">maxlines</span>
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">FILES-RECENTLY-MODIFIED-NOT-IN-GIT-DIRS</td>
+</tr>
+
+<tr>
+<td class="org-left">/home/george/projects/current</td>
+</tr>
+
+<tr>
+<td class="org-left">/home/george/projects/current/recently-modified-files.txt</td>
+</tr>
+
+<tr>
+<td class="org-left">/home/george/projects/current/ignore-these-dirs.txt</td>
+</tr>
+
+<tr>
+<td class="org-left">/home/george/projects/current/emacs</td>
+</tr>
+
+<tr>
+<td class="org-left">/home/george/projects/current/emacs/emacs-project.html</td>
+</tr>
+
+<tr>
+<td class="org-left"><i>home/george/projects/current/emacs</i>.#emacs-project.org</td>
+</tr>
+
+<tr>
+<td class="org-left">/home/george/projects/current/emacs/emacs-project.org</td>
+</tr>
+
+<tr>
+<td class="org-left">/home/george/projects/current/personal</td>
+</tr>
+
+<tr>
+<td class="org-left">/home/george/projects/current/personal/personal-project.org</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9"><span class="section-number-3">3.5</span> <span class="todo TODO">TODO</span> Do git pulls for all repos</h3>
+</div>
+</div>
+
+<div id="outline-container-orgheadline10" class="outline-2">
+<h2 id="orgheadline10"><span class="section-number-2">4</span> Caveats</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li>Using shell in babel is sometimes fragile.   Debugging often
+involves adding <code>|| true</code> to the end of commands to get the error
+messages.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2015-10-10 Sat 14:01&gt;</span></span></p>
+<p class="author">Author: George M Jones</p>
+<p class="date">Created: 2015-10-10 Sat 14:01</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
