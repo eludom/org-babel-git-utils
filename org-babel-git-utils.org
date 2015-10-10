@@ -4,7 +4,7 @@
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
 #+TITLE: Org Babel Git Utilities
-#+DATE: <2015-10-10 14:19:14 Saturday>
+#+DATE: <2015-10-10 15:07:32 Saturday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
@@ -103,8 +103,12 @@ You might have to put something like this in your =~/.emacs.d/init.el:
    the =:noexport:= tag, here's what I actually used to create the
    output below:
 
+
+
 #+NAME: BASEDIR
-| /home/george/projects/current |
+| /home/george/git/github.com/eludom/   |
+
+# | /home/george/projects/current |
 
 #+NAME: RECENT
 | 1   |
@@ -114,7 +118,6 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
 #+NAME: IGNOREDIRS
 | git-ignore-dirs.txt |
-
 
 * Actions
 ** DONE List git repos starting from a BASEDIR
@@ -127,7 +130,6 @@ You might have to put something like this in your =~/.emacs.d/init.el:
  #+end_src
 
  #+RESULTS: GIT-DIRS
- | /home/george/projects/current/git/.git           |
  | /home/george/projects/current/daniel/.git        |
  | /home/george/projects/current/home/.git          |
  | /home/george/projects/current/courses/.git       |
@@ -152,7 +154,6 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
  #+RESULTS: git-files-and-repos
  | gitdir                                           | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
- | /home/george/projects/current/git/.git           |         |                                               |         |         |                                               |        |
  | /home/george/projects/current/daniel/.git        | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (push) |
  | /home/george/projects/current/home/.git          | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (push) |
  | /home/george/projects/current/courses/.git       |         |                                               |         |         |                                               |        |
