@@ -3,8 +3,8 @@
 #+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
-#+TITLE: If it's not in git, it does not exist.
-#+DATE: <2015-10-10 12:50:11 Saturday>
+#+TITLE: Org Babel Git Utilities
+#+DATE: <2015-10-10 14:19:14 Saturday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
@@ -36,33 +36,85 @@ The [[*Actions][Actions]] listed below will currently do the following:
 - Find recently modified files (last RECENT days) that are not in a
   git repo or not in a directory listed to be ignored (IGNOREDIRS)
 
+For those not familiar with Babel, see
+http://orgmode.org/worg/org-contrib/babel/intro.html.  Short version,
+it allows you to run code blocks (bash, python, lisp....) like this
+
+#+begin_example
+#+begin_src sh  :results output :exports both
+exec 2>&1;date;set -e; set -u; set -x
+
+echo hello world
+#+end_src
+
+#+end_example
+
+#+begin_src sh  :results output :exports results
+exec 2>&1;date;set -e; set -u; set -x
+
+echo hello world
+#+end_src
+
+inside emacs .org files by simply typing ^C^C, getting results like this:
+
+#+RESULTS:
+: Sat Oct 10 13:47:28 EDT 2015
+: + echo hello world
+: hello world
+
 * Configuration
-
-  Set these variables as appropriate.
-
-** TODO [4/4] Automate my git repo setup
-
-   BASEDIR defines the root of all potentially git controlled files.
-
+** Description of configuration
+    #+begin_example
 #+NAME: BASEDIR
 | /home/george/projects/current |
-
-   RECENT defines the number of days that define "recent" modification.
 
 #+NAME: RECENT
 | 1   |
 
-   MAXLINES defined the maximum number of lines to display
+#+NAME: MAXLINES
+| 100 |
+
+#+NAME: IGNOREDIRS
+| git-ignore-dirs.txt |
+
+    #+end_example
+
+   - BASEDIR :: defines the root of all potentially git controlled files.
+   - RECENT :: defines the number of days that define "recent"
+        modification. 
+   - MAXLINES :: defined the maximum number of lines to display   
+   - IGNOREDIRS :: (if it exists) lists a file in BASEDIR that
+        contains   directory names to ignore.
+
+
+
+You might have to put something like this in your =~/.emacs.d/init.el:
+
+#+begin_src  lisp
+(org-babel-do-load-languages
+    'org-babel-load-languages '((python . t) (sh . t) (lisp . t) (R . t) (ditaa . t)))
+(setq org-export-babel-evaluate nil)
+(setq org-confirm-babel-evaluate nil)
+#+end_src
+
+** Actual configuration						   :noexport:
+   This section was intended to be invisible in the README.org, but it
+   looks like github's interpretation of =.org= files does not support
+   the =:noexport:= tag, here's what I actually used to create the
+   output below:
+
+#+NAME: BASEDIR
+| /home/george/projects/current |
+
+#+NAME: RECENT
+| 1   |
 
 #+NAME: MAXLINES
 | 100 |
 
-
-   IGNOREDIRS (if it exists) lists a file in BASEDIR that contains
-   directory names to ignore.
-
 #+NAME: IGNOREDIRS
 | git-ignore-dirs.txt |
+
 
 * Actions
 ** DONE List git repos starting from a BASEDIR
@@ -71,14 +123,15 @@ The [[*Actions][Actions]] listed below will currently do the following:
  #exec 2>&1;date;set -e; set -u; set -x
  #exec 2>&1;set +e; set -u; set -e
  cd $basedir
- find `pwd` -name .git -print | egrep -vi ansible || true
+ find `pwd` -name .git -print || true
  #+end_src
 
  #+RESULTS: GIT-DIRS
- | /home/george/projects/current/git/.git     |
- | /home/george/projects/current/daniel/.git  |
- | /home/george/projects/current/home/.git    |
- | /home/george/projects/current/courses/.git |
+ | /home/george/projects/current/git/.git           |
+ | /home/george/projects/current/daniel/.git        |
+ | /home/george/projects/current/home/.git          |
+ | /home/george/projects/current/courses/.git       |
+ | /home/george/projects/current/org-git-utils/.git |
 
 ** DONE List current remotes for each git repo
 
@@ -98,11 +151,12 @@ The [[*Actions][Actions]] listed below will currently do the following:
  #+end_src
 
  #+RESULTS: git-files-and-repos
- | gitdir                                     | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
- | /home/george/projects/current/git/.git     |         |                                               |         |         |                                               |        |
- | /home/george/projects/current/daniel/.git  | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (push) |
- | /home/george/projects/current/home/.git    | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (push) |
- | /home/george/projects/current/courses/.git |         |                                               |         |         |                                               |        |
+ | gitdir                                           | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
+ | /home/george/projects/current/git/.git           |         |                                               |         |         |                                               |        |
+ | /home/george/projects/current/daniel/.git        | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (push) |
+ | /home/george/projects/current/home/.git          | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (push) |
+ | /home/george/projects/current/courses/.git       |         |                                               |         |         |                                               |        |
+ | /home/george/projects/current/org-git-utils/.git | origin  | git@github.com:eludom/org-git-utils.git       | (fetch) | origin  | git@github.com:eludom/org-git-utils.git       | (push) |
 
 ** DONE Make sure things are checked in/out of git automatically
 
@@ -133,9 +187,11 @@ The [[*Actions][Actions]] listed below will currently do the following:
 
  #+RESULTS: git-autocommit-setup
  : dirname
+ : /home/george/projects/current/git/.dir-locals.el does not exist. Creating.
  : /home/george/projects/current/daniel/.dir-locals.el already exists
  : /home/george/projects/current/home/.dir-locals.el already exists
  : /home/george/projects/current/courses/.dir-locals.el already exists
+ : /home/george/projects/current/org-git-utils/.dir-locals.el does not exist. Creating.
 
 ** DONE Find recently modified files not in git
 
@@ -193,11 +249,6 @@ The [[*Actions][Actions]] listed below will currently do the following:
   | /home/george/projects/current/emacs/emacs-project.org       |
   | /home/george/projects/current/personal                      |
   | /home/george/projects/current/personal/personal-project.org |
-  | /home/george/projects/current/git                           |
-  | /home/george/projects/current/git/.#git-project.org         |
-  | /home/george/projects/current/git/git-project.org           |
-  | /home/george/projects/current/git-controlled-dirs.txt       |
-  | /home/george/projects/current/git-ignore-dirs.txt           |
 
 
 ** TODO Do git pulls for all repos
@@ -205,4 +256,14 @@ The [[*Actions][Actions]] listed below will currently do the following:
 * Caveats
   - Using shell in babel is sometimes fragile.   Debugging often
     involves adding =|| true= to the end of commands to get the error
-    messages.  
+    messages.
+  - There will only be one file in the org-git-utils repo.  Since org bable
+    files are self documenting, and github has some level of support
+    for org files, I will post a version of this as the README.org,
+    and check in another version as the file in the repo.   I expect
+    that the README will quickly dated as I continue to use and
+    improve the actual org-git-utils.org.   From time to time, I may
+    update the README, but you should pull the org-git-utils file from
+    the repo to actually use. 
+
+
