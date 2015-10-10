@@ -1,0 +1,208 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline
+#+OPTIONS: author:t c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil
+#+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
+#+OPTIONS: todo:t |:t
+#+TITLE: If it's not in git, it does not exist.
+#+DATE: <2015-10-10 12:50:11 Saturday>
+#+AUTHOR: George M Jones
+#+EMAIL: gmj@pobox.com
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 25.0.50.1 (Org mode 8.3beta)
+
+* Introduction
+
+#+begin_quote
+If it's not in git, it does not exist.
+
+--Me
+#+end_quote
+
+This is a set of Emacs org babel utilities to facilitate making that
+goal a reality.
+
+The model envisioned here is that there will be a base directory
+(BASEDIR), possibly your =$(HOME)= directory or something like
+=~/projects= with other directories below it, most/all of which should
+be under git control.
+
+The [[*Actions][Actions]] listed below will currently do the following:
+
+- find all repos unde BASEDIR
+- list the remotes (or lack of them) for each repo
+- Add .dir-locals.el to each repo for use with https://github.com/ryuslash/git-auto-commit-mode
+- Find recently modified files (last RECENT days) that are not in a
+  git repo or not in a directory listed to be ignored (IGNOREDIRS)
+
+* Configuration
+
+  Set these variables as appropriate.
+
+** TODO [4/4] Automate my git repo setup
+
+   BASEDIR defines the root of all potentially git controlled files.
+
+#+NAME: BASEDIR
+| /home/george/projects/current |
+
+   RECENT defines the number of days that define "recent" modification.
+
+#+NAME: RECENT
+| 1   |
+
+   MAXLINES defined the maximum number of lines to display
+
+#+NAME: MAXLINES
+| 100 |
+
+
+   IGNOREDIRS (if it exists) lists a file in BASEDIR that contains
+   directory names to ignore.
+
+#+NAME: IGNOREDIRS
+| git-ignore-dirs.txt |
+
+* Actions
+** DONE List git repos starting from a BASEDIR
+ #+name: GIT-DIRS
+ #+begin_src sh  :results table :exports both :var basedir=BASEDIR
+ #exec 2>&1;date;set -e; set -u; set -x
+ #exec 2>&1;set +e; set -u; set -e
+ cd $basedir
+ find `pwd` -name .git -print | egrep -vi ansible || true
+ #+end_src
+
+ #+RESULTS: GIT-DIRS
+ | /home/george/projects/current/git/.git     |
+ | /home/george/projects/current/daniel/.git  |
+ | /home/george/projects/current/home/.git    |
+ | /home/george/projects/current/courses/.git |
+
+** DONE List current remotes for each git repo
+
+   If a directory is listed with no remote, the decision needs to be
+   made to ignore this, or create a (possibly) remote repo and add
+   it.
+
+ #+name: git-files-and-repos
+ #+begin_src sh  :results table :exports both  :var gitdirs=GIT-DIRS 
+ echo gitdir remote1 url1 type1 remote2 url2 type2
+ for gitdir in $gitdirs; do
+   dirname=`dirname $gitdir` || true
+   cd $dirname || true
+   REMOTES=`git remote -v`  || true
+   echo $gitdir $REMOTES || true
+ done
+ #+end_src
+
+ #+RESULTS: git-files-and-repos
+ | gitdir                                     | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
+ | /home/george/projects/current/git/.git     |         |                                               |         |         |                                               |        |
+ | /home/george/projects/current/daniel/.git  | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (push) |
+ | /home/george/projects/current/home/.git    | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (push) |
+ | /home/george/projects/current/courses/.git |         |                                               |         |         |                                               |        |
+
+** DONE Make sure things are checked in/out of git automatically
+
+   I'm using git-auto-commit-mode
+   https://github.com/ryuslash/git-auto-commit-mode in emacs, which
+   automatically does a commit for every file save, optionally
+   prompting for commit message and pushing to the  upstream.  This
+   may be a little extreme, but maybe not....
+
+   This script makes sure each git controlled directory has the
+   requisite =.dir-locals.el= file.
+    
+ #+name: git-autocommit-setup
+ #+begin_src sh  :results output :exports both  :var gitdirs=GIT-DIRS
+ echo dirname 
+ for gitdir in $gitdirs; do
+   dirname=`dirname $gitdir` || true
+   file="${dirname}/.dir-locals.el"
+
+   if [ -f ${file} ]; then
+     echo ${file} already exists
+   else
+     echo ${file} does not exist. Creating.
+     echo '((nil . ((eval git-auto-commit-mode 1))))' > ${file}
+   fi
+ done
+ #+end_src
+
+ #+RESULTS: git-autocommit-setup
+ : dirname
+ : /home/george/projects/current/daniel/.dir-locals.el already exists
+ : /home/george/projects/current/home/.dir-locals.el already exists
+ : /home/george/projects/current/courses/.dir-locals.el already exists
+
+** DONE Find recently modified files not in git
+
+    Find recently modified files under the base directory that are not
+    in git controlled directories.
+
+    From here, the decision must be made to add directories to git
+    control, or put them in the IGNOREDIRS
+
+  #+name: find-recently-modified-files-not-in-git
+  #+begin_src sh  :results table :exports both  :var gitdirs=GIT-DIRS :var basedir=BASEDIR :var recent=RECENT :var maxlines=MAXLINES :var ignoredirs=IGNOREDIRS
+
+  # Crate a list of git controlled directorories
+  cd $basedir
+  cp /dev/null git-controlled-dirs.txt
+
+  for gitdir in $gitdirs; do
+    dirname=`dirname $gitdir` || true
+    echo $dirname >> git-controlled-dirs.txt
+  done
+
+  #echo GIT-CONTROLLED-DIRS
+  #cat git-controlled-dirs.txt
+
+  cat git-controlled-dirs.txt > ignore-these-dirs.txt
+
+  if [ -f $ignoredirs ]; then
+    cat $ignoredirs >> ignore-these-dirs.txt 
+  fi
+
+  #echo IGNORE ignore-these-dirs.txt
+  #cat ignore-these-dirs.txt
+
+  # Find files modified "recently"
+
+  find `pwd` -mtime -$recent -print > recently-modified-files.txt || true
+#  echo FILES-RECENTLY-MODIFIED
+#  cat recently-modified-files.txt || true
+
+  # List recently modified files not in git controlled directories
+
+  echo FILES-RECENTLY-MODIFIED-NOT-IN-GIT-DIRS
+  egrep -v -f ignore-these-dirs.txt recently-modified-files.txt | head -$maxlines
+  
+  #+end_src
+
+  #+RESULTS: find-recently-modified-files-not-in-git
+  | FILES-RECENTLY-MODIFIED-NOT-IN-GIT-DIRS                     |
+  | /home/george/projects/current                               |
+  | /home/george/projects/current/recently-modified-files.txt   |
+  | /home/george/projects/current/ignore-these-dirs.txt         |
+  | /home/george/projects/current/emacs                         |
+  | /home/george/projects/current/emacs/emacs-project.html      |
+  | /home/george/projects/current/emacs/.#emacs-project.org     |
+  | /home/george/projects/current/emacs/emacs-project.org       |
+  | /home/george/projects/current/personal                      |
+  | /home/george/projects/current/personal/personal-project.org |
+  | /home/george/projects/current/git                           |
+  | /home/george/projects/current/git/.#git-project.org         |
+  | /home/george/projects/current/git/git-project.org           |
+  | /home/george/projects/current/git-controlled-dirs.txt       |
+  | /home/george/projects/current/git-ignore-dirs.txt           |
+
+
+** TODO Do git pulls for all repos
+
+* Caveats
+  - Using shell in babel is sometimes fragile.   Debugging often
+    involves adding =|| true= to the end of commands to get the error
+    messages.  
