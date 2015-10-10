@@ -4,7 +4,7 @@
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
 #+TITLE: Org Babel Git Utilities
-#+DATE: <2015-10-10 14:11:43 Saturday>
+#+DATE: <2015-10-10 14:19:14 Saturday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
@@ -63,10 +63,7 @@ inside emacs .org files by simply typing ^C^C, getting results like this:
 : hello world
 
 * Configuration
-** TODO [4/4] Automate my git repo setup
-
-   Set the following babel variables as appropriate:
-
+** Description of configuration
     #+begin_example
 #+NAME: BASEDIR
 | /home/george/projects/current |
@@ -89,7 +86,23 @@ inside emacs .org files by simply typing ^C^C, getting results like this:
    - IGNOREDIRS :: (if it exists) lists a file in BASEDIR that
         contains   directory names to ignore.
 
-* Actual config goes here					   :noexport:
+
+
+You might have to put something like this in your =~/.emacs.d/init.el:
+
+#+begin_src  lisp
+(org-babel-do-load-languages
+    'org-babel-load-languages '((python . t) (sh . t) (lisp . t) (R . t) (ditaa . t)))
+(setq org-export-babel-evaluate nil)
+(setq org-confirm-babel-evaluate nil)
+#+end_src
+
+** Actual configuration						   :noexport:
+   This section was intended to be invisible in the README.org, but it
+   looks like github's interpretation of =.org= files does not support
+   the =:noexport:= tag, here's what I actually used to create the
+   output below:
+
 #+NAME: BASEDIR
 | /home/george/projects/current |
 
@@ -102,15 +115,6 @@ inside emacs .org files by simply typing ^C^C, getting results like this:
 #+NAME: IGNOREDIRS
 | git-ignore-dirs.txt |
 
-
-You might have to put something like this in your =~/.emacs.d/init.el:
-
-#+begin_src  lisp
-(org-babel-do-load-languages
-    'org-babel-load-languages '((python . t) (sh . t) (lisp . t) (R . t) (ditaa . t)))
-(setq org-export-babel-evaluate nil)
-(setq org-confirm-babel-evaluate nil)
-#+end_src
 
 * Actions
 ** DONE List git repos starting from a BASEDIR
