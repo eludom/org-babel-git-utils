@@ -4,7 +4,7 @@
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
 #+TITLE: Org Babel Git Utilities
-#+DATE: <2015-10-10 16:13:41 Saturday>
+#+DATE: <2015-10-11 06:15:22 Sunday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
@@ -62,17 +62,17 @@ inside emacs .org files by simply typing ^C^C, getting results like this:
 : + echo hello world
 : hello world
 
-
 * Configuration
-** Actual configuration						   :noexport:
-   This section was intended to be invisible in the README.org, but it
-   looks like github's interpretation of =.org= files does not support
-   the =:noexport:= tag, here's what I actually used to create the
-   output below:
+  First, set the variables below as appropriate:
 
-   - Note, in org-babel, it looks like the first lexical definition of
-     a =#NAME:= always wins, even if it is inside an
-     =#begin_example... #end_example#= block.
+  - BASEDIR :: defines the root of all potentially git controlled
+       files.
+       
+  - RECENT :: defines the number of days that define "recent"
+        modification. 
+  - MAXLINES :: defined the maximum number of lines to display   
+  - IGNOREDIRS :: (if it exists) lists a file in BASEDIR that
+        contains   directory names to ignore.
 
     #+NAME: BASEDIR
     | /home/george/projects/current   |
@@ -89,29 +89,6 @@ inside emacs .org files by simply typing ^C^C, getting results like this:
     #+NAME: IGNOREDIRS
     | git-ignore-dirs.txt |
 
-** Description of configuration
-   #+begin_src :eval no
-    #+NAME: BASEDIR
-    | /home/george/projects/current   |
-
-    #+NAME: RECENT
-    | 1   |
-
-    #+NAME: MAXLINES
-    | 100 |
-
-    #+NAME: IGNOREDIRS   
-   #+end_src
-
-   - BASEDIR :: defines the root of all potentially git controlled files.
-   - RECENT :: defines the number of days that define "recent"
-        modification. 
-   - MAXLINES :: defined the maximum number of lines to display   
-   - IGNOREDIRS :: (if it exists) lists a file in BASEDIR that
-        contains   directory names to ignore.
-
-
-
 You might have to put something like this in your =~/.emacs.d/init.el:
 
 #+begin_src  lisp
@@ -120,7 +97,6 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 (setq org-export-babel-evaluate nil)
 (setq org-confirm-babel-evaluate nil)
 #+end_src
-
 
 * Actions
 ** DONE List git repos starting from a BASEDIR
