@@ -4,7 +4,7 @@
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
 #+TITLE: Org Babel Git Utilities
-#+DATE: <2015-10-11 06:15:22 Sunday>
+#+DATE: <2015-10-11 09:02:34 Sunday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
@@ -109,9 +109,9 @@ You might have to put something like this in your =~/.emacs.d/init.el:
  #+end_src
 
  #+RESULTS: GIT-DIRS
- | /home/george/projects/current/daniel/.git        |
- | /home/george/projects/current/home/.git          |
- | /home/george/projects/current/org-git-utils/.git |
+ | /home/george/projects/current/daniel/.git              |
+ | /home/george/projects/current/home/.git                |
+ | /home/george/projects/current/org-babel-git-utils/.git |
 
 ** DONE List current remotes for each git repo
 
@@ -133,13 +133,12 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
  #+RESULTS: git-files-and-repos
  :RESULTS:
- | gitdir                                           | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
- |--------------------------------------------------+---------+-----------------------------------------------+---------+---------+-----------------------------------------------+--------|
- | /home/george/projects/current/daniel/.git        | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (push) |
- | /home/george/projects/current/home/.git          | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (push) |
- | /home/george/projects/current/org-git-utils/.git | origin  | git@github.com:eludom/org-git-utils.git       | (fetch) | origin  | git@github.com:eludom/org-git-utils.git       | (push) |
+ | gitdir                                                 | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
+ |--------------------------------------------------------+---------+-----------------------------------------------+---------+---------+-----------------------------------------------+--------|
+ | /home/george/projects/current/daniel/.git              | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (push) |
+ | /home/george/projects/current/home/.git                | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (push) |
+ | /home/george/projects/current/org-babel-git-utils/.git | origin  | git@github.com:eludom/org-babel-git-utils.git | (fetch) | origin  | git@github.com:eludom/org-babel-git-utils.git | (push) |
  :END:
-
 
 ** DONE Make sure things are checked in/out of git automatically
 
@@ -236,7 +235,57 @@ You might have to put something like this in your =~/.emacs.d/init.el:
   | /home/george/projects/current/courses/.dir-locals.el        |
 
 
-** TODO Do git pulls for all repos
+** TODO List need to push or pull repo
+
+   Determine if git push or pull is needed for each repo
+
+ #+name: git-pull
+ #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
+ exec 2>&1;set -e; set -u; set +x
+ echo "|gitdir | push or pull "
+ echo "|-"
+ for gitdir in $gitdirs; do
+   dirname=`dirname $gitdir` || true
+   cd $dirname || true
+   #REMOTES=`git remote -v`  || true
+   #echo $gitdir $REMOTES | sed 's/^/|/;s/ /|/g' || true
+
+   # Source: http://stackoverflow.com/questions/3258243/git-check-if-pull-needed
+
+   git fetch  --all | grep -v Fetching || true
+
+   LOCAL=$(git rev-parse @)
+   REMOTE=$(git rev-parse @{u})
+   BASE=$(git merge-base @ @{u})
+
+   echo -n "| $dirname |"
+   if [ $LOCAL = $REMOTE ]; then
+     echo "Up-to-date (LOCAL $LOCAL = REMOTE $REMOTE)"
+   elif [ $LOCAL = $BASE ]; then
+     echo "Need to pull (LOCAL $LOCAL = BASE $BASE)"
+   elif [ $REMOTE = $BASE ]; then
+     echo "Need to push (REMOTE $REMOTE = BASE $BASE)"
+   else
+     echo "Diverged"
+   fi
+ done
+ #+end_src
+
+ #+RESULTS: git-pull
+ :RESULTS:
+ | gitdir                                            | push or pull                                                                                                  |
+ |---------------------------------------------------+---------------------------------------------------------------------------------------------------------------|
+ | /home/george/projects/current/daniel              | Up-to-date (LOCAL 81bf6b01db0acbd5c8602b4956b25d83f259af1c = REMOTE 81bf6b01db0acbd5c8602b4956b25d83f259af1c) |
+ | /home/george/projects/current/home                | Up-to-date (LOCAL b5aa51a20532e851682fcbe6fe941e6414323c45 = REMOTE b5aa51a20532e851682fcbe6fe941e6414323c45) |
+ | /home/george/projects/current/org-babel-git-utils | Up-to-date (LOCAL 0e11b72b189e028660de17087fabb7b4fb5d6e1e = REMOTE 0e11b72b189e028660de17087fabb7b4fb5d6e1e) |
+ :END:
+
+
+
+ 
+
+
+
 
 * Caveats
   - Using shell in babel is sometimes fragile.   Debugging often
