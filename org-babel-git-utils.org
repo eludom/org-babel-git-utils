@@ -4,7 +4,7 @@
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
 #+TITLE: Org Babel Git Utilities
-#+DATE: <2015-10-11 09:02:34 Sunday>
+#+DATE: <2015-10-11 14:35:11 Sunday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
@@ -74,20 +74,19 @@ inside emacs .org files by simply typing ^C^C, getting results like this:
   - IGNOREDIRS :: (if it exists) lists a file in BASEDIR that
         contains   directory names to ignore.
 
-    #+NAME: BASEDIR
-    | /home/george/projects/current   |
+  NOTE: Org Babel seems to take the first definition of a =#+NAME:=.     
 
     #+NAME: BASEDIR
     | /home/george/git/github.com/eludom/   |
+    #+NAME: IGNOREDIRS
+    | org-bable-git-utils-ignore-dirs.txt |
 
     #+NAME: RECENT
-    | 1   |
+    | 180 |
 
     #+NAME: MAXLINES
     | 100 |
 
-    #+NAME: IGNOREDIRS
-    | git-ignore-dirs.txt |
 
 You might have to put something like this in your =~/.emacs.d/init.el:
 
@@ -100,18 +99,36 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
 * Actions
 ** DONE List git repos starting from a BASEDIR
+
+   Run this. then ask yourself "Can I get rid of any of
+   these repos" ?  If you can, delete, move them or get rid of the
+   .git/ directory so they will be ignored
+
  #+name: GIT-DIRS
- #+begin_src sh  :results table :exports both :var basedir=BASEDIR
+ #+begin_src sh  :results table :exports both :var basedir=BASEDIR :var ignoredirs=IGNOREDIRS
  exec 2>&1;set -e; set -u; set +x
- cd $basedir ||  echo "cd $basedir failed" 
- find `pwd` -name .git -print 
+ cd $basedir ||  echo "cd $basedir failed"
+
+ if [ -f $ignoredirs ]; then
+   #echo ignoring files in $ignoredirs
+   find `pwd` -name .git -print | egrep -v -f $ignoredirs
+ else
+   #echo nothing to skip
+   find `pwd` -name .git -print 
+ fi
+   
 
  #+end_src
 
  #+RESULTS: GIT-DIRS
- | /home/george/projects/current/daniel/.git              |
- | /home/george/projects/current/home/.git                |
- | /home/george/projects/current/org-babel-git-utils/.git |
+ | /home/george/git/github.com/eludom/elisp/.git            |
+ | /home/george/git/github.com/eludom/.emacs.d/.git         |
+ | /home/george/git/github.com/eludom/ExData_Plotting1/.git |
+ | /home/george/git/github.com/eludom/snippits/.git         |
+ | /home/george/git/github.com/eludom/ansible-configs/.git  |
+ | /home/george/git/github.com/eludom/HOWTO/.git            |
+ | /home/george/git/github.com/eludom/dotfiles/.git         |
+ | /home/george/git/github.com/eludom/config/.git           |
 
 ** DONE List current remotes for each git repo
 
@@ -133,11 +150,16 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
  #+RESULTS: git-files-and-repos
  :RESULTS:
- | gitdir                                                 | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
- |--------------------------------------------------------+---------+-----------------------------------------------+---------+---------+-----------------------------------------------+--------|
- | /home/george/projects/current/daniel/.git              | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git | (push) |
- | /home/george/projects/current/home/.git                | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/home       | (push) |
- | /home/george/projects/current/org-babel-git-utils/.git | origin  | git@github.com:eludom/org-babel-git-utils.git | (fetch) | origin  | git@github.com:eludom/org-babel-git-utils.git | (push) |
+ | gitdir                                                   | remote1 | url1                                           | type1   | remote2 | url2                                           | type2  |
+ |----------------------------------------------------------+---------+------------------------------------------------+---------+---------+------------------------------------------------+--------|
+ | /home/george/git/github.com/eludom/elisp/.git            | origin  | git@github-as-eludom:eludom/elisp.git          | (fetch) | origin  | git@github-as-eludom:eludom/elisp.git          | (push) |
+ | /home/george/git/github.com/eludom/.emacs.d/.git         | origin  | git@github-as-eludom:eludom/.emacs.d.git       | (fetch) | origin  | git@github-as-eludom:eludom/.emacs.d.git       | (push) |
+ | /home/george/git/github.com/eludom/ExData_Plotting1/.git | origin  | https://github.com/eludom/ExData_Plotting1.git | (fetch) | origin  | https://github.com/eludom/ExData_Plotting1.git | (push) |
+ | /home/george/git/github.com/eludom/snippits/.git         | origin  | git@github.com:eludom/snippits.git             | (fetch) | origin  | git@github.com:eludom/snippits.git             | (push) |
+ | /home/george/git/github.com/eludom/ansible-configs/.git  | origin  | git@github.com:eludom/ansible-configs.git      | (fetch) | origin  | git@github.com:eludom/ansible-configs.git      | (push) |
+ | /home/george/git/github.com/eludom/HOWTO/.git            | origin  | git@github-as-eludom:eludom/HOWTO.git          | (fetch) | origin  | git@github-as-eludom:eludom/HOWTO.git          | (push) |
+ | /home/george/git/github.com/eludom/dotfiles/.git         | origin  | git@github-as-eludom:eludom/dotfiles.git       | (fetch) | origin  | git@github-as-eludom:eludom/dotfiles.git       | (push) |
+ | /home/george/git/github.com/eludom/config/.git           | origin  | git@github.com:eludom/config.git               | (fetch) | origin  | git@github.com:eludom/config.git               | (push) |
  :END:
 
 ** DONE Make sure things are checked in/out of git automatically
@@ -219,20 +241,13 @@ You might have to put something like this in your =~/.emacs.d/init.el:
   #+end_src
 
   #+RESULTS: find-recently-modified-files-not-in-git
-  | FILES-RECENTLY-MODIFIED-NOT-IN-GIT-DIRS                     |
-  | /home/george/projects/current                               |
-  | /home/george/projects/current/recently-modified-files.txt   |
-  | /home/george/projects/current/ignore-these-dirs.txt         |
-  | /home/george/projects/current/emacs                         |
-  | /home/george/projects/current/emacs/emacs-project.html      |
-  | /home/george/projects/current/emacs/emacs-project.org       |
-  | /home/george/projects/current/personal                      |
-  | /home/george/projects/current/personal/personal-project.org |
-  | /home/george/projects/current/git-controlled-dirs.txt       |
-  | /home/george/projects/current/git-ignore-dirs.txt           |
-  | /home/george/projects/current/courses                       |
-  | /home/george/projects/current/courses/coursera/exdata-08    |
-  | /home/george/projects/current/courses/.dir-locals.el        |
+  | FILES-RECENTLY-MODIFIED-NOT-IN-GIT-DIRS                                |
+  | /home/george/git/github.com/eludom                                     |
+  | /home/george/git/github.com/eludom/recently-modified-files.txt         |
+  | /home/george/git/github.com/eludom/ignore-these-dirs.txt               |
+  | /home/george/git/github.com/eludom/git-controlled-dirs.txt             |
+  | /home/george/git/github.com/eludom/org-bable-git-utils-ignore-dirs.txt |
+
 
 
 ** TODO List need to push or pull repo
@@ -244,6 +259,8 @@ You might have to put something like this in your =~/.emacs.d/init.el:
  exec 2>&1;set -e; set -u; set +x
  echo "|gitdir | push or pull "
  echo "|-"
+ breakAfter=999
+ howMany=0
  for gitdir in $gitdirs; do
    dirname=`dirname $gitdir` || true
    cd $dirname || true
@@ -254,9 +271,9 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
    git fetch  --all | grep -v Fetching || true
 
-   LOCAL=$(git rev-parse @)
-   REMOTE=$(git rev-parse @{u})
-   BASE=$(git merge-base @ @{u})
+   LOCAL=$(git rev-parse @) || true
+   REMOTE=$(git rev-parse @{u}) || true
+   BASE=$(git merge-base @ @{u}) || true
 
    echo -n "| $dirname |"
    if [ $LOCAL = $REMOTE ]; then
@@ -268,24 +285,26 @@ You might have to put something like this in your =~/.emacs.d/init.el:
    else
      echo "Diverged"
    fi
+   howMany=$((howMany+1))
+   if [ $howMany -eq $breakAfter ]; then
+     break
+   fi
  done
  #+end_src
 
  #+RESULTS: git-pull
  :RESULTS:
- | gitdir                                            | push or pull                                                                                                  |
- |---------------------------------------------------+---------------------------------------------------------------------------------------------------------------|
- | /home/george/projects/current/daniel              | Up-to-date (LOCAL 81bf6b01db0acbd5c8602b4956b25d83f259af1c = REMOTE 81bf6b01db0acbd5c8602b4956b25d83f259af1c) |
- | /home/george/projects/current/home                | Up-to-date (LOCAL b5aa51a20532e851682fcbe6fe941e6414323c45 = REMOTE b5aa51a20532e851682fcbe6fe941e6414323c45) |
- | /home/george/projects/current/org-babel-git-utils | Up-to-date (LOCAL 0e11b72b189e028660de17087fabb7b4fb5d6e1e = REMOTE 0e11b72b189e028660de17087fabb7b4fb5d6e1e) |
+ | gitdir                                              | push or pull                                                                                                  |
+ |-----------------------------------------------------+---------------------------------------------------------------------------------------------------------------|
+ | /home/george/git/github.com/eludom/elisp            | Up-to-date (LOCAL 787bc2336c500bbdd2a2939426492755cd874021 = REMOTE 787bc2336c500bbdd2a2939426492755cd874021) |
+ | /home/george/git/github.com/eludom/.emacs.d         | Up-to-date (LOCAL 282c7df77a930962ed4771d82ecf71f930aada36 = REMOTE 282c7df77a930962ed4771d82ecf71f930aada36) |
+ | /home/george/git/github.com/eludom/ExData_Plotting1 | Up-to-date (LOCAL 50f41bb53a1d8b203e0a58d2ebf7d749aeffb767 = REMOTE 50f41bb53a1d8b203e0a58d2ebf7d749aeffb767) |
+ | /home/george/git/github.com/eludom/snippits         | Up-to-date (LOCAL b2d53f961184d1d7e93fa2380f009085e7a7ba1a = REMOTE b2d53f961184d1d7e93fa2380f009085e7a7ba1a) |
+ | /home/george/git/github.com/eludom/ansible-configs  | Up-to-date (LOCAL 35b0c4d11da9ecee082b243742a8879ab1a794d2 = REMOTE 35b0c4d11da9ecee082b243742a8879ab1a794d2) |
+ | /home/george/git/github.com/eludom/HOWTO            | Up-to-date (LOCAL 6c507235f9fc0e0762d16c862f6ff747044d659d = REMOTE 6c507235f9fc0e0762d16c862f6ff747044d659d) |
+ | /home/george/git/github.com/eludom/dotfiles         | Up-to-date (LOCAL f792496f34f151ae9c6c29b2701bff8142b9a4b4 = REMOTE f792496f34f151ae9c6c29b2701bff8142b9a4b4) |
+ | /home/george/git/github.com/eludom/config           | Up-to-date (LOCAL 35b0c4d11da9ecee082b243742a8879ab1a794d2 = REMOTE 35b0c4d11da9ecee082b243742a8879ab1a794d2) |
  :END:
-
-
-
- 
-
-
-
 
 * Caveats
   - Using shell in babel is sometimes fragile.   Debugging often
