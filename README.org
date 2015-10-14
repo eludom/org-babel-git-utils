@@ -1,10 +1,10 @@
-#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline
+b#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline
 #+OPTIONS: author:t c:nil creator:nil d:(not "LOGBOOK") date:t e:t
 #+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
 #+TITLE: Org Babel Git Utilities
-#+DATE: <2015-10-11 14:13:29 Sunday>
+#+DATE: <2015-10-14 09:15:02 Wednesday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
@@ -77,7 +77,13 @@ inside emacs .org files by simply typing ^C^C, getting results like this:
   NOTE: Org Babel seems to take the first definition of a =#+NAME:=.     
 
     #+NAME: BASEDIR
-    | /home/george/git/github.com/eludom/   |
+    | /home/george/projects/current                                |
+
+
+    #+NAME: BASEDIR
+    | /home/george/git/github.com/eludom/ |
+
+
     #+NAME: IGNOREDIRS
     | org-bable-git-utils-ignore-dirs.txt |
 
@@ -121,14 +127,10 @@ You might have to put something like this in your =~/.emacs.d/init.el:
  #+end_src
 
  #+RESULTS: GIT-DIRS
- | /home/george/git/github.com/eludom/elisp/.git            |
- | /home/george/git/github.com/eludom/.emacs.d/.git         |
- | /home/george/git/github.com/eludom/ExData_Plotting1/.git |
- | /home/george/git/github.com/eludom/snippits/.git         |
- | /home/george/git/github.com/eludom/ansible-configs/.git  |
- | /home/george/git/github.com/eludom/HOWTO/.git            |
- | /home/george/git/github.com/eludom/dotfiles/.git         |
- | /home/george/git/github.com/eludom/config/.git           |
+ | /home/george/projects/current/backups/.git             |
+ | /home/george/projects/current/daniel/.git              |
+ | /home/george/projects/current/home/.git                |
+ | /home/george/projects/current/org-babel-git-utils/.git |
 
 ** DONE List current remotes for each git repo
 
@@ -150,50 +152,137 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
  #+RESULTS: git-files-and-repos
  :RESULTS:
- | gitdir                                                   | remote1 | url1                                           | type1   | remote2 | url2                                           | type2  |
- |----------------------------------------------------------+---------+------------------------------------------------+---------+---------+------------------------------------------------+--------|
- | /home/george/git/github.com/eludom/elisp/.git            | origin  | git@github-as-eludom:eludom/elisp.git          | (fetch) | origin  | git@github-as-eludom:eludom/elisp.git          | (push) |
- | /home/george/git/github.com/eludom/.emacs.d/.git         | origin  | git@github-as-eludom:eludom/.emacs.d.git       | (fetch) | origin  | git@github-as-eludom:eludom/.emacs.d.git       | (push) |
- | /home/george/git/github.com/eludom/ExData_Plotting1/.git | origin  | https://github.com/eludom/ExData_Plotting1.git | (fetch) | origin  | https://github.com/eludom/ExData_Plotting1.git | (push) |
- | /home/george/git/github.com/eludom/snippits/.git         | origin  | git@github.com:eludom/snippits.git             | (fetch) | origin  | git@github.com:eludom/snippits.git             | (push) |
- | /home/george/git/github.com/eludom/ansible-configs/.git  | origin  | git@github.com:eludom/ansible-configs.git      | (fetch) | origin  | git@github.com:eludom/ansible-configs.git      | (push) |
- | /home/george/git/github.com/eludom/HOWTO/.git            | origin  | git@github-as-eludom:eludom/HOWTO.git          | (fetch) | origin  | git@github-as-eludom:eludom/HOWTO.git          | (push) |
- | /home/george/git/github.com/eludom/dotfiles/.git         | origin  | git@github-as-eludom:eludom/dotfiles.git       | (fetch) | origin  | git@github-as-eludom:eludom/dotfiles.git       | (push) |
- | /home/george/git/github.com/eludom/config/.git           | origin  | git@github.com:eludom/config.git               | (fetch) | origin  | git@github.com:eludom/config.git               | (push) |
+ | gitdir                                                 | remote1 | url1                                                          | type1   | remote2 | url2                                                          | type2  |
+ |--------------------------------------------------------+---------+---------------------------------------------------------------+---------+---------+---------------------------------------------------------------+--------|
+ | /home/george/projects/current/backups/.git             | origin  | ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/backups | (fetch) | origin  | ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/backups | (push) |
+ | /home/george/projects/current/daniel/.git              | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git                 | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git                 | (push) |
+ | /home/george/projects/current/home/.git                | origin  | ssh://gmj@port111.com/home/gmj/git/home                       | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/home                       | (push) |
+ | /home/george/projects/current/org-babel-git-utils/.git | origin  | git@github.com:eludom/org-babel-git-utils.git                 | (fetch) | origin  | git@github.com:eludom/org-babel-git-utils.git                 | (push) |
  :END:
 
-** DONE Make sure things are checked in/out of git automatically
+** DONE List need to push/pull repos (in sync with remote?)
 
-   I'm using git-auto-commit-mode
-   https://github.com/ryuslash/git-auto-commit-mode in emacs, which
-   automatically does a commit for every file save, optionally
-   prompting for commit message and pushing to the  upstream.  This
-   may be a little extreme, but maybe not....
+  -  Determine if git push or pull is needed for each repo
 
-   This script makes sure each git controlled directory has the
-   requisite =.dir-locals.el= file.
-    
- #+name: git-autocommit-setup
- #+begin_src sh  :results output :exports both  :var gitdirs=GIT-DIRS
- echo dirname 
+  - If you see something like
+
+    #+begin_example
+    fatal: No upstream configured for branch 'master'
+    fatal: No upstream configured for branch 'master'
+    | /home/gmj/git/../foo |bash: line 51: [: bbefddf8d6c5233a9789afd550940ce39d74557e: unary operator expected
+    #+end_example
+
+    Look a
+    http://unix.stackexchange.com/questions/66548/git-pull-from-remote-but-no-such-ref-was-fetched
+    to resolve.  I think
+
+    #+begin_example
+    git pull
+    git status
+    #git add if needed
+    #git commit if needed
+    git push -u is the answer
+    #+end_example
+
+ #+name: git-pull
+ #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
+ exec 2>&1;set -e; set -u; set +x
+ echo "|gitdir | push or pull "
+ echo "|-"
+ breakAfter=999
+ howMany=0
  for gitdir in $gitdirs; do
    dirname=`dirname $gitdir` || true
-   file="${dirname}/.dir-locals.el"
+   cd $dirname || true
+   #REMOTES=`git remote -v`  || true
+   #echo $gitdir $REMOTES | sed 's/^/|/;s/ /|/g' || true
 
-   if [ -f ${file} ]; then
-     echo ${file} already exists
+   # Source: http://stackoverflow.com/questions/3258243/git-check-if-pull-needed
+
+   git fetch  --all | grep -v Fetching || true
+
+   LOCAL=$(git rev-parse @) || true
+   REMOTE=$(git rev-parse @{u}) || true
+   BASE=$(git merge-base @ @{u}) || true
+
+   echo -n "| $dirname |"
+   if [ $LOCAL = $REMOTE ]; then
+     echo "Up-to-date (LOCAL $LOCAL = REMOTE $REMOTE)"
+   elif [ $LOCAL = $BASE ]; then
+     echo "Need to pull (LOCAL $LOCAL = BASE $BASE)"
+   elif [ $REMOTE = $BASE ]; then
+     echo "Need to push (REMOTE $REMOTE = BASE $BASE)"
    else
-     echo ${file} does not exist. Creating.
-     echo '((nil . ((eval git-auto-commit-mode 1))))' > ${file}
+     echo "Diverged"
+   fi
+   howMany=$((howMany+1))
+   if [ $howMany -eq $breakAfter ]; then
+     break
    fi
  done
  #+end_src
 
- #+RESULTS: git-autocommit-setup
- : dirname
- : /home/george/projects/current/daniel/.dir-locals.el already exists
- : /home/george/projects/current/home/.dir-locals.el already exists
- : /home/george/projects/current/org-git-utils/.dir-locals.el already exists
+ #+RESULTS: git-pull
+ :RESULTS:
+ | gitdir                                            | push or pull                                                                                                  |
+ |---------------------------------------------------+---------------------------------------------------------------------------------------------------------------|
+ | /home/george/projects/current/backups             | Up-to-date (LOCAL 0a9c5e4acb4c386f6adc422bb865f49a1aa732ef = REMOTE 0a9c5e4acb4c386f6adc422bb865f49a1aa732ef) |
+ | /home/george/projects/current/daniel              | Up-to-date (LOCAL 81bf6b01db0acbd5c8602b4956b25d83f259af1c = REMOTE 81bf6b01db0acbd5c8602b4956b25d83f259af1c) |
+ | /home/george/projects/current/home                | Up-to-date (LOCAL b5aa51a20532e851682fcbe6fe941e6414323c45 = REMOTE b5aa51a20532e851682fcbe6fe941e6414323c45) |
+ | /home/george/projects/current/org-babel-git-utils | Up-to-date (LOCAL dcd5e5f5ec753308adc359dfc4ab4e39d926b4be = REMOTE dcd5e5f5ec753308adc359dfc4ab4e39d926b4be) |
+ :END:
+
+** TODO List number of modified files per repo (need to git add/commit)
+
+  -  Determine if we need to do git add/commit.
+
+  - then maybe do something like
+
+    #+begin_example
+    git add `git ls-files -m`;git commit -msync;git push    
+    #+end_example
+
+    TODO:
+      - add =ls-files -m= file output to the table below (maybe first N)    
+      - create another action to do pull/add/commit/push
+
+ #+name: git-modified
+ #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
+ exec 2>&1;set -e; set -u; set +x
+ echo "|gitdir | modified count "
+ echo "|-"
+ breakAfter=999
+ howMany=0
+ for gitdir in $gitdirs; do
+   dirname=`dirname $gitdir` || true
+   cd $dirname || true
+   #REMOTES=`git remote -v`  || true
+   #echo $gitdir $REMOTES | sed 's/^/|/;s/ /|/g' || true
+
+   # Source: http://stackoverflow.com/questions/3258243/git-check-if-pull-needed
+ 
+   echo -n "| $dirname |"
+
+   modifiedCount=`git ls-files -m | wc -l`
+
+   echo ${modifiedCount}
+ 
+   howMany=$((howMany+1))
+   if [ $howMany -eq $breakAfter ]; then
+     break
+   fi
+ done
+ #+end_src
+
+ #+RESULTS: git-modified
+ :RESULTS:
+ | gitdir                                            | modified count |
+ |---------------------------------------------------+----------------|
+ | /home/george/projects/current/backups             |              0 |
+ | /home/george/projects/current/daniel              |              0 |
+ | /home/george/projects/current/home                |              1 |
+ | /home/george/projects/current/org-babel-git-utils |              1 |
+ :END:
 
 ** DONE Find recently modified files not in git
 
@@ -240,71 +329,39 @@ You might have to put something like this in your =~/.emacs.d/init.el:
   
   #+end_src
 
-  #+RESULTS: find-recently-modified-files-not-in-git
-  | FILES-RECENTLY-MODIFIED-NOT-IN-GIT-DIRS                                |
-  | /home/george/git/github.com/eludom                                     |
-  | /home/george/git/github.com/eludom/recently-modified-files.txt         |
-  | /home/george/git/github.com/eludom/.#testing                           |
-  | /home/george/git/github.com/eludom/ignore-these-dirs.txt               |
-  | /home/george/git/github.com/eludom/git-controlled-dirs.txt             |
-  | /home/george/git/github.com/eludom/org-bable-git-utils-ignore-dirs.txt |
 
+** WAITING Make sure things are checked in/out of git automatically
 
-** TODO List need to push or pull repo
+   I'm using git-auto-commit-mode
+   https://github.com/ryuslash/git-auto-commit-mode in emacs, which
+   automatically does a commit for every file save, optionally
+   prompting for commit message and pushing to the  upstream.  This
+   may be a little extreme, but maybe not....
 
-   Determine if git push or pull is needed for each repo
-
- #+name: git-pull
- #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
- exec 2>&1;set -e; set -u; set +x
- echo "|gitdir | push or pull "
- echo "|-"
- breakAfter=999
- howMany=0
+   This script makes sure each git controlled directory has the
+   requisite =.dir-locals.el= file.
+    
+ #+name: git-autocommit-setup
+ #+begin_src sh  :results output :exports both  :var gitdirs=GIT-DIRS
+ echo dirname 
  for gitdir in $gitdirs; do
    dirname=`dirname $gitdir` || true
-   cd $dirname || true
-   #REMOTES=`git remote -v`  || true
-   #echo $gitdir $REMOTES | sed 's/^/|/;s/ /|/g' || true
+   file="${dirname}/.dir-locals.el"
 
-   # Source: http://stackoverflow.com/questions/3258243/git-check-if-pull-needed
-
-   git fetch  --all | grep -v Fetching || true
-
-   LOCAL=$(git rev-parse @) || true
-   REMOTE=$(git rev-parse @{u}) || true
-   BASE=$(git merge-base @ @{u}) || true
-
-   echo -n "| $dirname |"
-   if [ $LOCAL = $REMOTE ]; then
-     echo "Up-to-date (LOCAL $LOCAL = REMOTE $REMOTE)"
-   elif [ $LOCAL = $BASE ]; then
-     echo "Need to pull (LOCAL $LOCAL = BASE $BASE)"
-   elif [ $REMOTE = $BASE ]; then
-     echo "Need to push (REMOTE $REMOTE = BASE $BASE)"
+   if [ -f ${file} ]; then
+     echo ${file} already exists
    else
-     echo "Diverged"
-   fi
-   howMany=$((howMany+1))
-   if [ $howMany -eq $breakAfter ]; then
-     break
+     echo ${file} does not exist. Creating.
+     echo '((nil . ((eval git-auto-commit-mode 1))))' > ${file}
    fi
  done
  #+end_src
 
- #+RESULTS: git-pull
- :RESULTS:
- | gitdir                                              | push or pull                                                                                                   |
- |-----------------------------------------------------+----------------------------------------------------------------------------------------------------------------|
- | /home/george/git/github.com/eludom/elisp            | Need to push (REMOTE ddb77bfd0afe4b91ee1fa3c977982b9609c4d54f = BASE ddb77bfd0afe4b91ee1fa3c977982b9609c4d54f) |
- | /home/george/git/github.com/eludom/.emacs.d         | Up-to-date (LOCAL 282c7df77a930962ed4771d82ecf71f930aada36 = REMOTE 282c7df77a930962ed4771d82ecf71f930aada36)  |
- | /home/george/git/github.com/eludom/ExData_Plotting1 | Up-to-date (LOCAL 50f41bb53a1d8b203e0a58d2ebf7d749aeffb767 = REMOTE 50f41bb53a1d8b203e0a58d2ebf7d749aeffb767)  |
- | /home/george/git/github.com/eludom/snippits         | Up-to-date (LOCAL b2d53f961184d1d7e93fa2380f009085e7a7ba1a = REMOTE b2d53f961184d1d7e93fa2380f009085e7a7ba1a)  |
- | /home/george/git/github.com/eludom/ansible-configs  | Diverged                                                                                                       |
- | /home/george/git/github.com/eludom/HOWTO            | Up-to-date (LOCAL 6c507235f9fc0e0762d16c862f6ff747044d659d = REMOTE 6c507235f9fc0e0762d16c862f6ff747044d659d)  |
- | /home/george/git/github.com/eludom/dotfiles         | Up-to-date (LOCAL f792496f34f151ae9c6c29b2701bff8142b9a4b4 = REMOTE f792496f34f151ae9c6c29b2701bff8142b9a4b4)  |
- | /home/george/git/github.com/eludom/config           | Need to push (REMOTE a0de86492d3a3fec78ce22228036a31d7143bd9c = BASE a0de86492d3a3fec78ce22228036a31d7143bd9c) |
- :END:
+ #+RESULTS: git-autocommit-setup
+ : dirname
+ : /home/george/projects/current/daniel/.dir-locals.el already exists
+ : /home/george/projects/current/home/.dir-locals.el already exists
+ : /home/george/projects/current/org-git-utils/.dir-locals.el already exists
 
 * Caveats
   - Using shell in babel is sometimes fragile.   Debugging often
