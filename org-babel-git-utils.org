@@ -1,10 +1,10 @@
-b#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline
 #+OPTIONS: author:t c:nil creator:nil d:(not "LOGBOOK") date:t e:t
 #+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
 #+TITLE: Org Babel Git Utilities
-#+DATE: <2015-10-14 09:15:02 Wednesday>
+#+DATE: <2015-10-14 09:19:08 Wednesday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
