@@ -4,7 +4,7 @@
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
 #+TITLE: Org Babel Git Utilities
-#+DATE: <2015-10-14 09:19:08 Wednesday>
+#+DATE: <2015-12-23 15:41:32 Wednesday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
@@ -77,11 +77,16 @@ inside emacs .org files by simply typing ^C^C, getting results like this:
   NOTE: Org Babel seems to take the first definition of a =#+NAME:=.     
 
     #+NAME: BASEDIR
-    | /home/george/projects/current                                |
-
+    | /home/george/git/github.com/eludom/ |
 
     #+NAME: BASEDIR
-    | /home/george/git/github.com/eludom/ |
+    | /home/george/ |
+
+    #+NAME: BASEDIR
+    | /home/george/git/octo/george/       |
+
+    #+NAME: BASEDIR
+    | /home/george/projects/current                                |
 
 
     #+NAME: IGNOREDIRS
@@ -117,20 +122,26 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
  if [ -f $ignoredirs ]; then
    #echo ignoring files in $ignoredirs
-   find `pwd` -name .git -print | egrep -v -f $ignoredirs
+   find `pwd` -name .git -print | egrep -v -f $ignoredirs || echo "find and ignore failed"
  else
    #echo nothing to skip
-   find `pwd` -name .git -print 
+   find `pwd` -name .git -print || echo "find  failed"
  fi
    
 
  #+end_src
 
  #+RESULTS: GIT-DIRS
- | /home/george/projects/current/backups/.git             |
- | /home/george/projects/current/daniel/.git              |
- | /home/george/projects/current/home/.git                |
- | /home/george/projects/current/org-babel-git-utils/.git |
+ | /home/george/git/github.com/eludom/elisp/.git               |
+ | /home/george/git/github.com/eludom/.emacs.d/.git            |
+ | /home/george/git/github.com/eludom/snippits/.git            |
+ | /home/george/git/github.com/eludom/ansible-configs/.git     |
+ | /home/george/git/github.com/eludom/HOWTO/.git               |
+ | /home/george/git/github.com/eludom/acd_cli/.git             |
+ | /home/george/git/github.com/eludom/dotfiles/.git            |
+ | /home/george/git/github.com/eludom/org-babel-git-utils/.git |
+
+
 
 ** DONE List current remotes for each git repo
 
@@ -140,96 +151,45 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
  #+name: git-files-and-repos
  #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
- echo gitdir remote1 url1 type1 remote2 url2 type2 | sed 's/^/|/;s/ /|/g'
+ echo gitdir description remote1  url1 type1 remote2 url2 type2 | sed 's/^/|/;s/ /|/g'
  echo "|-"
  for gitdir in $gitdirs; do
    dirname=`dirname $gitdir` || true
    cd $dirname || true
+
+   # note ~/.git/description is not pushed/pulled by git
+   # so I'm putting one line descriptions in the top of the repo
+   descFile="${dirname}/description"  
+
+   if [ -f ${descFile} ]; then
+      desc=$(head -1 $descFile) 
+
+      if [[ "$desc" ==  *"Unnamed repository"* ]]; then 
+          desc="UnnamedRepo"
+      else
+          desc=$(echo $desc | cut -c1-20 | sed 's/$/\.\.\./')
+      fi
+   else
+         desc="No_Description"
+   fi
+
    REMOTES=`git remote -v`  || true
-   echo $gitdir $REMOTES | sed 's/^/|/;s/ /|/g' || true
+   echo $gitdir $(echo $desc | sed 's/ /_/g') $REMOTES | sed 's/^/|/;s/ /|/g' || true
  done
  #+end_src
 
  #+RESULTS: git-files-and-repos
  :RESULTS:
- | gitdir                                                 | remote1 | url1                                                          | type1   | remote2 | url2                                                          | type2  |
- |--------------------------------------------------------+---------+---------------------------------------------------------------+---------+---------+---------------------------------------------------------------+--------|
- | /home/george/projects/current/backups/.git             | origin  | ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/backups | (fetch) | origin  | ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/backups | (push) |
- | /home/george/projects/current/daniel/.git              | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git                 | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/daniel.git                 | (push) |
- | /home/george/projects/current/home/.git                | origin  | ssh://gmj@port111.com/home/gmj/git/home                       | (fetch) | origin  | ssh://gmj@port111.com/home/gmj/git/home                       | (push) |
- | /home/george/projects/current/org-babel-git-utils/.git | origin  | git@github.com:eludom/org-babel-git-utils.git                 | (fetch) | origin  | git@github.com:eludom/org-babel-git-utils.git                 | (push) |
- :END:
-
-** DONE List need to push/pull repos (in sync with remote?)
-
-  -  Determine if git push or pull is needed for each repo
-
-  - If you see something like
-
-    #+begin_example
-    fatal: No upstream configured for branch 'master'
-    fatal: No upstream configured for branch 'master'
-    | /home/gmj/git/../foo |bash: line 51: [: bbefddf8d6c5233a9789afd550940ce39d74557e: unary operator expected
-    #+end_example
-
-    Look a
-    http://unix.stackexchange.com/questions/66548/git-pull-from-remote-but-no-such-ref-was-fetched
-    to resolve.  I think
-
-    #+begin_example
-    git pull
-    git status
-    #git add if needed
-    #git commit if needed
-    git push -u is the answer
-    #+end_example
-
- #+name: git-pull
- #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
- exec 2>&1;set -e; set -u; set +x
- echo "|gitdir | push or pull "
- echo "|-"
- breakAfter=999
- howMany=0
- for gitdir in $gitdirs; do
-   dirname=`dirname $gitdir` || true
-   cd $dirname || true
-   #REMOTES=`git remote -v`  || true
-   #echo $gitdir $REMOTES | sed 's/^/|/;s/ /|/g' || true
-
-   # Source: http://stackoverflow.com/questions/3258243/git-check-if-pull-needed
-
-   git fetch  --all | grep -v Fetching || true
-
-   LOCAL=$(git rev-parse @) || true
-   REMOTE=$(git rev-parse @{u}) || true
-   BASE=$(git merge-base @ @{u}) || true
-
-   echo -n "| $dirname |"
-   if [ $LOCAL = $REMOTE ]; then
-     echo "Up-to-date (LOCAL $LOCAL = REMOTE $REMOTE)"
-   elif [ $LOCAL = $BASE ]; then
-     echo "Need to pull (LOCAL $LOCAL = BASE $BASE)"
-   elif [ $REMOTE = $BASE ]; then
-     echo "Need to push (REMOTE $REMOTE = BASE $BASE)"
-   else
-     echo "Diverged"
-   fi
-   howMany=$((howMany+1))
-   if [ $howMany -eq $breakAfter ]; then
-     break
-   fi
- done
- #+end_src
-
- #+RESULTS: git-pull
- :RESULTS:
- | gitdir                                            | push or pull                                                                                                  |
- |---------------------------------------------------+---------------------------------------------------------------------------------------------------------------|
- | /home/george/projects/current/backups             | Up-to-date (LOCAL 0a9c5e4acb4c386f6adc422bb865f49a1aa732ef = REMOTE 0a9c5e4acb4c386f6adc422bb865f49a1aa732ef) |
- | /home/george/projects/current/daniel              | Up-to-date (LOCAL 81bf6b01db0acbd5c8602b4956b25d83f259af1c = REMOTE 81bf6b01db0acbd5c8602b4956b25d83f259af1c) |
- | /home/george/projects/current/home                | Up-to-date (LOCAL b5aa51a20532e851682fcbe6fe941e6414323c45 = REMOTE b5aa51a20532e851682fcbe6fe941e6414323c45) |
- | /home/george/projects/current/org-babel-git-utils | Up-to-date (LOCAL dcd5e5f5ec753308adc359dfc4ab4e39d926b4be = REMOTE dcd5e5f5ec753308adc359dfc4ab4e39d926b4be) |
+ | gitdir                                                      | description             | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
+ |-------------------------------------------------------------+-------------------------+---------+-----------------------------------------------+---------+---------+-----------------------------------------------+--------|
+ | /home/george/git/github.com/eludom/elisp/.git               | Misc_elisp_files_wri... | origin  | git@github-as-eludom:eludom/elisp.git         | (fetch) | origin  | git@github-as-eludom:eludom/elisp.git         | (push) |
+ | /home/george/git/github.com/eludom/.emacs.d/.git            | gmj_main_Emacs_start... | origin  | git@github-as-eludom:eludom/.emacs.d.git      | (fetch) | origin  | git@github-as-eludom:eludom/.emacs.d.git      | (push) |
+ | /home/george/git/github.com/eludom/snippits/.git            | code_snippits_in_var... | origin  | git@github.com:eludom/snippits.git            | (fetch) | origin  | git@github.com:eludom/snippits.git            | (push) |
+ | /home/george/git/github.com/eludom/ansible-configs/.git     | Experiments_with_ans... | origin  | https://github.com/eludom/ansible-configs.git | (fetch) | origin  | https://github.com/eludom/ansible-configs.git | (push) |
+ | /home/george/git/github.com/eludom/HOWTO/.git               | Various_HOWTOs_I_hav... | origin  | git@github-as-eludom:eludom/HOWTO.git         | (fetch) | origin  | git@github-as-eludom:eludom/HOWTO.git         | (push) |
+ | /home/george/git/github.com/eludom/acd_cli/.git             | Amazon_Cloud_Drive_C... | origin  | git@github.com:eludom/acd_cli.git             | (fetch) | origin  | git@github.com:eludom/acd_cli.git             | (push) |
+ | /home/george/git/github.com/eludom/dotfiles/.git            | My_dotfiles_and_~bin... | origin  | git@github-as-eludom:eludom/dotfiles.git      | (fetch) | origin  | git@github-as-eludom:eludom/dotfiles.git      | (push) |
+ | /home/george/git/github.com/eludom/org-babel-git-utils/.git | Org-mode_"dashboard"... | origin  | git@github.com:eludom/org-babel-git-utils.git | (fetch) | origin  | git@github.com:eludom/org-babel-git-utils.git | (push) |
  :END:
 
 ** TODO List number of modified files per repo (need to git add/commit)
@@ -276,13 +236,18 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
  #+RESULTS: git-modified
  :RESULTS:
- | gitdir                                            | modified count |
- |---------------------------------------------------+----------------|
- | /home/george/projects/current/backups             |              0 |
- | /home/george/projects/current/daniel              |              0 |
- | /home/george/projects/current/home                |              1 |
- | /home/george/projects/current/org-babel-git-utils |              1 |
+ | gitdir                                                 | modified count |
+ |--------------------------------------------------------+----------------|
+ | /home/george/git/github.com/eludom/elisp               |              0 |
+ | /home/george/git/github.com/eludom/.emacs.d            |              0 |
+ | /home/george/git/github.com/eludom/snippits            |              0 |
+ | /home/george/git/github.com/eludom/ansible-configs     |              0 |
+ | /home/george/git/github.com/eludom/HOWTO               |              0 |
+ | /home/george/git/github.com/eludom/acd_cli             |              0 |
+ | /home/george/git/github.com/eludom/dotfiles            |              0 |
+ | /home/george/git/github.com/eludom/org-babel-git-utils |              0 |
  :END:
+
 
 ** DONE Find recently modified files not in git
 
@@ -329,6 +294,14 @@ You might have to put something like this in your =~/.emacs.d/init.el:
   
   #+end_src
 
+  #+RESULTS: find-recently-modified-files-not-in-git
+  | FILES-RECENTLY-MODIFIED-NOT-IN-GIT-DIRS                                |
+  | /home/george/git/github.com/eludom                                     |
+  | /home/george/git/github.com/eludom/recently-modified-files.txt         |
+  | /home/george/git/github.com/eludom/ignore-these-dirs.txt               |
+  | /home/george/git/github.com/eludom/git-controlled-dirs.txt             |
+  | /home/george/git/github.com/eludom/bin                                 |
+  | /home/george/git/github.com/eludom/org-bable-git-utils-ignore-dirs.txt |
 
 ** WAITING Make sure things are checked in/out of git automatically
 
