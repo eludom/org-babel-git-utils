@@ -4,7 +4,7 @@
 #+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
 #+OPTIONS: todo:t |:t
 #+TITLE: Org Babel Git Utilities
-#+DATE: <2015-12-23 15:41:32 Wednesday>
+#+DATE: <2016-03-20 07:26:05 Sunday>
 #+AUTHOR: George M Jones
 #+EMAIL: gmj@pobox.com
 #+LANGUAGE: en
@@ -20,80 +20,32 @@ If it's not in git, it does not exist.
 --Me
 #+end_quote
 
-This is a set of Emacs org babel utilities to facilitate making that
-goal a reality.
+This is a set of Emacs org babel utilities to facilitate visibility
+into the state of a large number of git repos under a given root. 
 
-The model envisioned here is that there will be a base directory
-(BASEDIR), possibly your =$(HOME)= directory or something like
-=~/projects= with other directories below it, most/all of which should
-be under git control.
-
-The [[*Actions][Actions]] listed below will currently do the following:
-
-- find all repos unde BASEDIR
-- list the remotes (or lack of them) for each repo
-- Add .dir-locals.el to each repo for use with https://github.com/ryuslash/git-auto-commit-mode
-- Find recently modified files (last RECENT days) that are not in a
-  git repo or not in a directory listed to be ignored (IGNOREDIRS)
-
-For those not familiar with Babel, see
-http://orgmode.org/worg/org-contrib/babel/intro.html.  Short version,
-it allows you to run code blocks (bash, python, lisp....) like this
-
-#+begin_example
-#+begin_src sh  :results output :exports both
-exec 2>&1;date;set -e; set -u; set -x
-
-echo hello world
-#+end_src
-
-#+end_example
-
-#+begin_src sh  :results output :exports results
-exec 2>&1;date;set -e; set -u; set -x
-
-echo hello world
-#+end_src
-
-inside emacs .org files by simply typing ^C^C, getting results like this:
-
-#+RESULTS:
-: Sat Oct 10 13:47:28 EDT 2015
-: + echo hello world
-: hello world
+The actions provided below are designed to give visibility to the need
+to perform actions on various repos (pull, push, add a remote where
+lacking, etc).  These utilities do not provide means for doing
+operations on files within repos, e.g. add, commit, etc.  It is
+assumed those will be done with command line git or via an interface
+such as https://github.com/magit/magit.
 
 * Configuration
   First, set the variables below as appropriate:
 
-  - BASEDIR :: defines the root of all potentially git controlled
-       files.
-       
-  - RECENT :: defines the number of days that define "recent"
-        modification. 
+  - BASEDIR :: look for directories under this that have .git directories
   - MAXLINES :: defined the maximum number of lines to display   
   - IGNOREDIRS :: (if it exists) lists a file in BASEDIR that
         contains   directory names to ignore.
 
   NOTE: Org Babel seems to take the first definition of a =#+NAME:=.     
 
-    #+NAME: BASEDIR
-    | /home/george/git/github.com/eludom/ |
 
     #+NAME: BASEDIR
-    | /home/george/ |
-
-    #+NAME: BASEDIR
-    | /home/george/git/octo/george/       |
-
-    #+NAME: BASEDIR
-    | /home/george/projects/current                                |
-
+    | /home/george/home/public/
 
     #+NAME: IGNOREDIRS
     | org-bable-git-utils-ignore-dirs.txt |
-
-    #+NAME: RECENT
-    | 180 |
 
     #+NAME: MAXLINES
     | 100 |
@@ -103,7 +55,7 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
 #+begin_src  lisp
 (org-babel-do-load-languages
-    'org-babel-load-languages '((python . t) (sh . t) (lisp . t) (R . t) (ditaa . t)))
+    'org-babel-load-languages '((python . t) (shell . t) (lisp . t) (R . t) (ditaa . t)))
 (setq org-export-babel-evaluate nil)
 (setq org-confirm-babel-evaluate nil)
 #+end_src
@@ -132,14 +84,15 @@ You might have to put something like this in your =~/.emacs.d/init.el:
  #+end_src
 
  #+RESULTS: GIT-DIRS
- | /home/george/git/github.com/eludom/elisp/.git               |
- | /home/george/git/github.com/eludom/.emacs.d/.git            |
- | /home/george/git/github.com/eludom/snippits/.git            |
- | /home/george/git/github.com/eludom/ansible-configs/.git     |
- | /home/george/git/github.com/eludom/HOWTO/.git               |
- | /home/george/git/github.com/eludom/acd_cli/.git             |
- | /home/george/git/github.com/eludom/dotfiles/.git            |
- | /home/george/git/github.com/eludom/org-babel-git-utils/.git |
+ | /home/george/home/public/elisp/.git               |
+ | /home/george/home/public/.emacs.d/.git            |
+ | /home/george/home/public/metaproject/.git         |
+ | /home/george/home/public/dotfiles/.git            |
+ | /home/george/home/public/org-babel-git-utils/.git |
+
+
+
+
 
 
 
@@ -180,17 +133,79 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
  #+RESULTS: git-files-and-repos
  :RESULTS:
- | gitdir                                                      | description             | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
- |-------------------------------------------------------------+-------------------------+---------+-----------------------------------------------+---------+---------+-----------------------------------------------+--------|
- | /home/george/git/github.com/eludom/elisp/.git               | Misc_elisp_files_wri... | origin  | git@github-as-eludom:eludom/elisp.git         | (fetch) | origin  | git@github-as-eludom:eludom/elisp.git         | (push) |
- | /home/george/git/github.com/eludom/.emacs.d/.git            | gmj_main_Emacs_start... | origin  | git@github-as-eludom:eludom/.emacs.d.git      | (fetch) | origin  | git@github-as-eludom:eludom/.emacs.d.git      | (push) |
- | /home/george/git/github.com/eludom/snippits/.git            | code_snippits_in_var... | origin  | git@github.com:eludom/snippits.git            | (fetch) | origin  | git@github.com:eludom/snippits.git            | (push) |
- | /home/george/git/github.com/eludom/ansible-configs/.git     | Experiments_with_ans... | origin  | https://github.com/eludom/ansible-configs.git | (fetch) | origin  | https://github.com/eludom/ansible-configs.git | (push) |
- | /home/george/git/github.com/eludom/HOWTO/.git               | Various_HOWTOs_I_hav... | origin  | git@github-as-eludom:eludom/HOWTO.git         | (fetch) | origin  | git@github-as-eludom:eludom/HOWTO.git         | (push) |
- | /home/george/git/github.com/eludom/acd_cli/.git             | Amazon_Cloud_Drive_C... | origin  | git@github.com:eludom/acd_cli.git             | (fetch) | origin  | git@github.com:eludom/acd_cli.git             | (push) |
- | /home/george/git/github.com/eludom/dotfiles/.git            | My_dotfiles_and_~bin... | origin  | git@github-as-eludom:eludom/dotfiles.git      | (fetch) | origin  | git@github-as-eludom:eludom/dotfiles.git      | (push) |
- | /home/george/git/github.com/eludom/org-babel-git-utils/.git | Org-mode_"dashboard"... | origin  | git@github.com:eludom/org-babel-git-utils.git | (fetch) | origin  | git@github.com:eludom/org-babel-git-utils.git | (push) |
+ | gitdir                                            | description             | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
+ |---------------------------------------------------+-------------------------+---------+-----------------------------------------------+---------+---------+-----------------------------------------------+--------|
+ | /home/george/home/public/elisp/.git               | Misc_elisp_files_wri... | origin  | git@github-as-eludom:eludom/elisp.git         | (fetch) | origin  | git@github-as-eludom:eludom/elisp.git         | (push) |
+ | /home/george/home/public/.emacs.d/.git            | gmj_main_Emacs_start... | origin  | git@github-as-eludom:eludom/.emacs.d.git      | (fetch) | origin  | git@github-as-eludom:eludom/.emacs.d.git      | (push) |
+ | /home/george/home/public/metaproject/.git         | No_Description          | origin  | git@github.com:eludom/metaproject.git         | (fetch) | origin  | git@github.com:eludom/metaproject.git         | (push) |
+ | /home/george/home/public/dotfiles/.git            | No_Description          | origin  | git@github-as-eludom:eludom/dotfiles.git      | (fetch) | origin  | git@github-as-eludom:eludom/dotfiles.git      | (push) |
+ | /home/george/home/public/org-babel-git-utils/.git | Org-mode_"dashboard"... | origin  | git@github.com:eludom/org-babel-git-utils.git | (fetch) | origin  | git@github.com:eludom/org-babel-git-utils.git | (push) |
  :END:
+
+
+
+
+
+
+** DONE List need to push/pull repos (in sync with remote?)
+
+  -  Determine if git push or pull is needed for each repo
+
+ #+name: git-pull
+ #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
+ exec 2>&1;set -e; set -u; set +x
+ echo "|gitdir | push or pull "
+ echo "|-"
+ breakAfter=999
+ howMany=0
+ for gitdir in $gitdirs; do
+   dirname=`dirname $gitdir` || true
+   cd $dirname || true
+   REMOTES=`git remote -v`  || true
+   #echo $gitdir $REMOTES | sed 's/^/|/;s/ /|/g' || true
+
+   # Source: http://stackoverflow.com/questions/3258243/git-check-if-pull-needed
+
+   git fetch  --all | grep -v Fetching || true
+
+
+   echo -n "| $dirname |"
+   if [ ! "${REMOTES}" ]; then
+     echo "no remote"
+   else
+     LOCAL=$(git rev-parse @) || true
+     REMOTE=$(git rev-parse @{u}) || true
+     BASE=$(git merge-base @ @{u}) || true
+
+     if [ $LOCAL = $REMOTE ]; then
+       echo "Up-to-date (LOCAL $LOCAL = REMOTE $REMOTE)"
+     elif [ $LOCAL = $BASE ]; then
+       echo "Need to pull (LOCAL $LOCAL = BASE $BASE)"
+     elif [ $REMOTE = $BASE ]; then
+       echo "Need to push (REMOTE $REMOTE = BASE $BASE)"
+     else
+       echo "Diverged"
+     fi
+   fi
+
+   howMany=$((howMany+1))
+   if [ $howMany -eq $breakAfter ]; then
+     break
+   fi
+ done
+ #+end_src
+
+ #+RESULTS: git-pull
+ :RESULTS:
+ | gitdir                                       | push or pull                                                                                                  |
+ |----------------------------------------------+---------------------------------------------------------------------------------------------------------------|
+ | /home/george/home/public/elisp               | Need to pull (LOCAL 323f7ada99a1d7cc39bd81b4e4fc46eec20cc7b5 = BASE 323f7ada99a1d7cc39bd81b4e4fc46eec20cc7b5) |
+ | /home/george/home/public/.emacs.d            | Up-to-date (LOCAL 21fe4a44266b2bb8f863163ce8998743dd1e9e60 = REMOTE 21fe4a44266b2bb8f863163ce8998743dd1e9e60) |
+ | /home/george/home/public/metaproject         | Up-to-date (LOCAL e645c2979279a734c4548258ac3e7e14205c31ec = REMOTE e645c2979279a734c4548258ac3e7e14205c31ec) |
+ | /home/george/home/public/dotfiles            | Up-to-date (LOCAL cdafa84d97f1f7422aac27534b2315f48edbde7e = REMOTE cdafa84d97f1f7422aac27534b2315f48edbde7e) |
+ | /home/george/home/public/org-babel-git-utils | Up-to-date (LOCAL b4fa9675cae001ad53ac36b29ab520483c43feff = REMOTE b4fa9675cae001ad53ac36b29ab520483c43feff) |
+ :END:
+
 
 ** TODO List number of modified files per repo (need to git add/commit)
 
@@ -236,105 +251,15 @@ You might have to put something like this in your =~/.emacs.d/init.el:
 
  #+RESULTS: git-modified
  :RESULTS:
- | gitdir                                                 | modified count |
- |--------------------------------------------------------+----------------|
- | /home/george/git/github.com/eludom/elisp               |              0 |
- | /home/george/git/github.com/eludom/.emacs.d            |              0 |
- | /home/george/git/github.com/eludom/snippits            |              0 |
- | /home/george/git/github.com/eludom/ansible-configs     |              0 |
- | /home/george/git/github.com/eludom/HOWTO               |              0 |
- | /home/george/git/github.com/eludom/acd_cli             |              0 |
- | /home/george/git/github.com/eludom/dotfiles            |              0 |
- | /home/george/git/github.com/eludom/org-babel-git-utils |              0 |
+ | gitdir                                       | modified count |
+ |----------------------------------------------+----------------|
+ | /home/george/home/public/elisp               |              0 |
+ | /home/george/home/public/.emacs.d            |              2 |
+ | /home/george/home/public/metaproject         |              1 |
+ | /home/george/home/public/dotfiles            |              0 |
+ | /home/george/home/public/org-babel-git-utils |              2 |
  :END:
 
-
-** DONE Find recently modified files not in git
-
-    Find recently modified files under the base directory that are not
-    in git controlled directories.
-
-    From here, the decision must be made to add directories to git
-    control, or put them in the IGNOREDIRS
-
-  #+name: find-recently-modified-files-not-in-git
-  #+begin_src sh  :results table :exports both  :var gitdirs=GIT-DIRS :var basedir=BASEDIR :var recent=RECENT :var maxlines=MAXLINES :var ignoredirs=IGNOREDIRS
-
-  # Crate a list of git controlled directorories
-  cd $basedir
-  cp /dev/null git-controlled-dirs.txt
-
-  for gitdir in $gitdirs; do
-    dirname=`dirname $gitdir` || true
-    echo $dirname >> git-controlled-dirs.txt
-  done
-
-  #echo GIT-CONTROLLED-DIRS
-  #cat git-controlled-dirs.txt
-
-  cat git-controlled-dirs.txt > ignore-these-dirs.txt
-
-  if [ -f $ignoredirs ]; then
-    cat $ignoredirs >> ignore-these-dirs.txt 
-  fi
-
-  #echo IGNORE ignore-these-dirs.txt
-  #cat ignore-these-dirs.txt
-
-  # Find files modified "recently"
-
-  find `pwd` -mtime -$recent -print > recently-modified-files.txt || true
-#  echo FILES-RECENTLY-MODIFIED
-#  cat recently-modified-files.txt || true
-
-  # List recently modified files not in git controlled directories
-
-  echo FILES-RECENTLY-MODIFIED-NOT-IN-GIT-DIRS
-  egrep -v -f ignore-these-dirs.txt recently-modified-files.txt | head -$maxlines
-  
-  #+end_src
-
-  #+RESULTS: find-recently-modified-files-not-in-git
-  | FILES-RECENTLY-MODIFIED-NOT-IN-GIT-DIRS                                |
-  | /home/george/git/github.com/eludom                                     |
-  | /home/george/git/github.com/eludom/recently-modified-files.txt         |
-  | /home/george/git/github.com/eludom/ignore-these-dirs.txt               |
-  | /home/george/git/github.com/eludom/git-controlled-dirs.txt             |
-  | /home/george/git/github.com/eludom/bin                                 |
-  | /home/george/git/github.com/eludom/org-bable-git-utils-ignore-dirs.txt |
-
-** WAITING Make sure things are checked in/out of git automatically
-
-   I'm using git-auto-commit-mode
-   https://github.com/ryuslash/git-auto-commit-mode in emacs, which
-   automatically does a commit for every file save, optionally
-   prompting for commit message and pushing to the  upstream.  This
-   may be a little extreme, but maybe not....
-
-   This script makes sure each git controlled directory has the
-   requisite =.dir-locals.el= file.
-    
- #+name: git-autocommit-setup
- #+begin_src sh  :results output :exports both  :var gitdirs=GIT-DIRS
- echo dirname 
- for gitdir in $gitdirs; do
-   dirname=`dirname $gitdir` || true
-   file="${dirname}/.dir-locals.el"
-
-   if [ -f ${file} ]; then
-     echo ${file} already exists
-   else
-     echo ${file} does not exist. Creating.
-     echo '((nil . ((eval git-auto-commit-mode 1))))' > ${file}
-   fi
- done
- #+end_src
-
- #+RESULTS: git-autocommit-setup
- : dirname
- : /home/george/projects/current/daniel/.dir-locals.el already exists
- : /home/george/projects/current/home/.dir-locals.el already exists
- : /home/george/projects/current/org-git-utils/.dir-locals.el already exists
 
 * Caveats
   - Using shell in babel is sometimes fragile.   Debugging often
