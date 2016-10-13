@@ -1,0 +1,278 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline
+#+OPTIONS: author:t c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil
+#+OPTIONS: stat:t tags:t tasks:t tex:t timestamp:t title:t toc:2
+#+OPTIONS: todo:t |:t
+#+TITLE: Org Babel Git Utilities
+#+DATE: <2016-03-20 07:26:05 Sunday>
+#+AUTHOR: George M Jones
+#+EMAIL: gmj@pobox.com
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 25.0.50.1 (Org mode 8.3beta)
+
+* Introduction
+
+#+begin_quote
+If it's not in git, it does not exist.
+
+--Me
+#+end_quote
+
+This is a set of Emacs org babel utilities to facilitate visibility
+into the state of a large number of git repos under a given root. 
+
+The actions provided below are designed to give visibility to the need
+to perform actions on various repos (pull, push, add a remote where
+lacking, etc).  These utilities do not provide means for doing
+operations on files within repos, e.g. add, commit, etc.  It is
+assumed those will be done with command line git or via an interface
+such as https://github.com/magit/magit.
+
+* Configuration
+  First, set the variables below as appropriate:
+
+  - BASEDIR :: look for directories under this that have .git directories
+  - MAXLINES :: defined the maximum number of lines to display   
+  - IGNOREDIRS :: (if it exists) lists a file in BASEDIR that
+        contains   directory names to ignore.
+
+  NOTE: Org Babel seems to take the first definition of a =#+NAME:=.     
+
+
+    #+NAME: BASEDIR
+    | /home/george/home/public/
+
+    #+NAME: IGNOREDIRS
+    | org-bable-git-utils-ignore-dirs.txt |
+
+    #+NAME: MAXLINES
+    | 100 |
+
+
+You might have to put something like this in your =~/.emacs.d/init.el:
+
+#+begin_src  lisp
+(org-babel-do-load-languages
+    'org-babel-load-languages '((python . t) (shell . t) (lisp . t) (R . t) (ditaa . t)))
+(setq org-export-babel-evaluate nil)
+(setq org-confirm-babel-evaluate nil)
+#+end_src
+
+* Actions
+** DONE List git repos starting from a BASEDIR
+
+   Run this. then ask yourself "Can I get rid of any of
+   these repos" ?  If you can, delete, move them or get rid of the
+   .git/ directory so they will be ignored
+
+ #+name: GIT-DIRS
+ #+begin_src sh  :results table :exports both :var basedir=BASEDIR :var ignoredirs=IGNOREDIRS
+ exec 2>&1;set -e; set -u; set +x
+ cd $basedir ||  echo "cd $basedir failed"
+
+ if [ -f $ignoredirs ]; then
+   #echo ignoring files in $ignoredirs
+   find `pwd` -name .git -print | egrep -v -f $ignoredirs || echo "find and ignore failed"
+ else
+   #echo nothing to skip
+   find `pwd` -name .git -print || echo "find  failed"
+ fi
+   
+
+ #+end_src
+
+ #+RESULTS: GIT-DIRS
+ | /home/george/home/public/elisp/.git               |
+ | /home/george/home/public/.emacs.d/.git            |
+ | /home/george/home/public/metaproject/.git         |
+ | /home/george/home/public/dotfiles/.git            |
+ | /home/george/home/public/org-babel-git-utils/.git |
+
+
+
+
+
+
+
+** DONE List current remotes for each git repo
+
+   If a directory is listed with no remote, the decision needs to be
+   made to ignore this, or create a (possibly) remote repo and add
+   it.
+
+ #+name: git-files-and-repos
+ #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
+ echo gitdir description remote1  url1 type1 remote2 url2 type2 | sed 's/^/|/;s/ /|/g'
+ echo "|-"
+ for gitdir in $gitdirs; do
+   dirname=`dirname $gitdir` || true
+   cd $dirname || true
+
+   # note ~/.git/description is not pushed/pulled by git
+   # so I'm putting one line descriptions in the top of the repo
+   descFile="${dirname}/description"  
+
+   if [ -f ${descFile} ]; then
+      desc=$(head -1 $descFile) 
+
+      if [[ "$desc" ==  *"Unnamed repository"* ]]; then 
+          desc="UnnamedRepo"
+      else
+          desc=$(echo $desc | cut -c1-20 | sed 's/$/\.\.\./')
+      fi
+   else
+         desc="No_Description"
+   fi
+
+   REMOTES=`git remote -v`  || true
+   echo $gitdir $(echo $desc | sed 's/ /_/g') $REMOTES | sed 's/^/|/;s/ /|/g' || true
+ done
+ #+end_src
+
+ #+RESULTS: git-files-and-repos
+ :RESULTS:
+ | gitdir                                            | description             | remote1 | url1                                          | type1   | remote2 | url2                                          | type2  |
+ |---------------------------------------------------+-------------------------+---------+-----------------------------------------------+---------+---------+-----------------------------------------------+--------|
+ | /home/george/home/public/elisp/.git               | Misc_elisp_files_wri... | origin  | git@github-as-eludom:eludom/elisp.git         | (fetch) | origin  | git@github-as-eludom:eludom/elisp.git         | (push) |
+ | /home/george/home/public/.emacs.d/.git            | gmj_main_Emacs_start... | origin  | git@github-as-eludom:eludom/.emacs.d.git      | (fetch) | origin  | git@github-as-eludom:eludom/.emacs.d.git      | (push) |
+ | /home/george/home/public/metaproject/.git         | No_Description          | origin  | git@github.com:eludom/metaproject.git         | (fetch) | origin  | git@github.com:eludom/metaproject.git         | (push) |
+ | /home/george/home/public/dotfiles/.git            | No_Description          | origin  | git@github-as-eludom:eludom/dotfiles.git      | (fetch) | origin  | git@github-as-eludom:eludom/dotfiles.git      | (push) |
+ | /home/george/home/public/org-babel-git-utils/.git | Org-mode_"dashboard"... | origin  | git@github.com:eludom/org-babel-git-utils.git | (fetch) | origin  | git@github.com:eludom/org-babel-git-utils.git | (push) |
+ :END:
+
+
+
+
+
+
+** DONE List need to push/pull repos (in sync with remote?)
+
+  -  Determine if git push or pull is needed for each repo
+
+ #+name: git-pull
+ #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
+ exec 2>&1;set -e; set -u; set +x
+ echo "|gitdir | push or pull "
+ echo "|-"
+ breakAfter=999
+ howMany=0
+ for gitdir in $gitdirs; do
+   dirname=`dirname $gitdir` || true
+   cd $dirname || true
+   REMOTES=`git remote -v`  || true
+   #echo $gitdir $REMOTES | sed 's/^/|/;s/ /|/g' || true
+
+   # Source: http://stackoverflow.com/questions/3258243/git-check-if-pull-needed
+
+   git fetch  --all | grep -v Fetching || true
+
+
+   echo -n "| $dirname |"
+   if [ ! "${REMOTES}" ]; then
+     echo "no remote"
+   else
+     LOCAL=$(git rev-parse @) || true
+     REMOTE=$(git rev-parse @{u}) || true
+     BASE=$(git merge-base @ @{u}) || true
+
+     if [ $LOCAL = $REMOTE ]; then
+       echo "Up-to-date (LOCAL $LOCAL = REMOTE $REMOTE)"
+     elif [ $LOCAL = $BASE ]; then
+       echo "Need to pull (LOCAL $LOCAL = BASE $BASE)"
+     elif [ $REMOTE = $BASE ]; then
+       echo "Need to push (REMOTE $REMOTE = BASE $BASE)"
+     else
+       echo "Diverged"
+     fi
+   fi
+
+   howMany=$((howMany+1))
+   if [ $howMany -eq $breakAfter ]; then
+     break
+   fi
+ done
+ #+end_src
+
+ #+RESULTS: git-pull
+ :RESULTS:
+ | gitdir                                       | push or pull                                                                                                  |
+ |----------------------------------------------+---------------------------------------------------------------------------------------------------------------|
+ | /home/george/home/public/elisp               | Need to pull (LOCAL 323f7ada99a1d7cc39bd81b4e4fc46eec20cc7b5 = BASE 323f7ada99a1d7cc39bd81b4e4fc46eec20cc7b5) |
+ | /home/george/home/public/.emacs.d            | Up-to-date (LOCAL 21fe4a44266b2bb8f863163ce8998743dd1e9e60 = REMOTE 21fe4a44266b2bb8f863163ce8998743dd1e9e60) |
+ | /home/george/home/public/metaproject         | Up-to-date (LOCAL e645c2979279a734c4548258ac3e7e14205c31ec = REMOTE e645c2979279a734c4548258ac3e7e14205c31ec) |
+ | /home/george/home/public/dotfiles            | Up-to-date (LOCAL cdafa84d97f1f7422aac27534b2315f48edbde7e = REMOTE cdafa84d97f1f7422aac27534b2315f48edbde7e) |
+ | /home/george/home/public/org-babel-git-utils | Up-to-date (LOCAL b4fa9675cae001ad53ac36b29ab520483c43feff = REMOTE b4fa9675cae001ad53ac36b29ab520483c43feff) |
+ :END:
+
+
+** TODO List number of modified files per repo (need to git add/commit)
+
+  -  Determine if we need to do git add/commit.
+
+  - then maybe do something like
+
+    #+begin_example
+    git add `git ls-files -m`;git commit -msync;git push    
+    #+end_example
+
+    TODO:
+      - add =ls-files -m= file output to the table below (maybe first N)    
+      - create another action to do pull/add/commit/push
+
+ #+name: git-modified
+ #+begin_src sh   :exports both  :var gitdirs=GIT-DIRS :results verbatim drawer
+ exec 2>&1;set -e; set -u; set +x
+ echo "|gitdir | modified count "
+ echo "|-"
+ breakAfter=999
+ howMany=0
+ for gitdir in $gitdirs; do
+   dirname=`dirname $gitdir` || true
+   cd $dirname || true
+   #REMOTES=`git remote -v`  || true
+   #echo $gitdir $REMOTES | sed 's/^/|/;s/ /|/g' || true
+
+   # Source: http://stackoverflow.com/questions/3258243/git-check-if-pull-needed
+ 
+   echo -n "| $dirname |"
+
+   modifiedCount=`git ls-files -m | wc -l`
+
+   echo ${modifiedCount}
+ 
+   howMany=$((howMany+1))
+   if [ $howMany -eq $breakAfter ]; then
+     break
+   fi
+ done
+ #+end_src
+
+ #+RESULTS: git-modified
+ :RESULTS:
+ | gitdir                                       | modified count |
+ |----------------------------------------------+----------------|
+ | /home/george/home/public/elisp               |              0 |
+ | /home/george/home/public/.emacs.d            |              2 |
+ | /home/george/home/public/metaproject         |              1 |
+ | /home/george/home/public/dotfiles            |              0 |
+ | /home/george/home/public/org-babel-git-utils |              2 |
+ :END:
+
+
+* Caveats
+  - Using shell in babel is sometimes fragile.   Debugging often
+    involves adding =|| true= to the end of commands to get the error
+    messages.
+  - There will only be one file in the org-git-utils repo.  Since org bable
+    files are self documenting, and github has some level of support
+    for org files, I will post a version of this as the README.org,
+    and check in another version as the file in the repo.   I expect
+    that the README will quickly dated as I continue to use and
+    improve the actual org-git-utils.org.   From time to time, I may
+    update the README, but you should pull the org-git-utils file from
+    the repo to actually use. 
+
+
+
